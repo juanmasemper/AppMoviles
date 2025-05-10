@@ -31,6 +31,11 @@ import kotlin.random.Random
 import androidx.compose.material3.Text
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Button
+import com.example.tp2appmoviles.ui.components.SharedBackground
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.Icons
 
 class GuessNumberActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +48,7 @@ class GuessNumberActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuessNumberGame() {
     val context = LocalContext.current
@@ -62,118 +68,128 @@ fun GuessNumberGame() {
 
     val animatedMessageColor by animateColorAsState(targetValue = messageColor)
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB))
+    SharedBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                TopAppBar(
+                    title = { Text("Adivina el Número") },
+                    navigationIcon = {
+                        IconButton(onClick = { (context as ComponentActivity).finish() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Volver",
+                            )
+                        }
+                    },
                 )
-            )
-            .padding(24.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Puntaje: $currentScore", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                Text("Máximo puntaje: $maxScore", fontSize = 24.sp)
-                Text("Fallos seguidos: $consecutiveFails / 5", fontSize = 18.sp)
             }
-
-            OutlinedTextField(
-                value = guessInput,
-                onValueChange = { guessInput = it },
-                label = { Text("Adiviná un número (1-5)") },
-                modifier = Modifier.fillMaxWidth(0.85f)
-            )
-
+        ) { innerPadding ->
             Column(
-                modifier = Modifier.fillMaxWidth(0.85f),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .padding(24.dp),
+                verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Button(
-                    onClick = {
-                        val guess = guessInput.toIntOrNull()
-                        val randomNumber = Random.nextInt(1, 6)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Puntaje: $currentScore", fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                    Text("Máximo puntaje: $maxScore", fontSize = 24.sp)
+                    Text("Fallos seguidos: $consecutiveFails / 5", fontSize = 18.sp)
+                }
 
-                        if (guess == null || guess !in 1..5) {
-                            message = "Ingresá un número válido entre 1 y 5."
-                            messageColor = Color.Gray
-                            return@Button
-                        }
+                OutlinedTextField(
+                    value = guessInput,
+                    onValueChange = { guessInput = it },
+                    label = { Text("Adiviná un número (1-5)") },
+                    modifier = Modifier.fillMaxWidth(0.85f)
+                )
 
-                        if (guess == randomNumber) {
-                            currentScore += 10
-                            consecutiveFails = 0
-                            message = "¡Adivinaste! 🎉"
-                            messageColor = Color(0xFF4CAF50)
-                            vibrateSafe(context, 200)
-                            MediaPlayer.create(context, Settings.System.DEFAULT_NOTIFICATION_URI).start()
-                        } else {
-                            consecutiveFails++
-                            message = "Fallaste. Era $randomNumber."
-                            messageColor = Color(0xFFF44336)
-                            vibrateSafe(context, 400)
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.85f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            val guess = guessInput.toIntOrNull()
+                            val randomNumber = Random.nextInt(1, 6)
 
-                            if (consecutiveFails == 5) {
-                                currentScore = 0
-                                consecutiveFails = 0
-                                message = "Perdiste. Puntaje reiniciado."
+                            if (guess == null || guess !in 1..5) {
+                                message = "Ingresá un número válido entre 1 y 5."
                                 messageColor = Color.Gray
+                                return@Button
                             }
-                        }
 
-                        if (currentScore > maxScore) {
-                            maxScore = currentScore
-                            coroutineScope.launch {
-                                prefs.edit { putInt("MAX_SCORE", maxScore) }
+                            if (guess == randomNumber) {
+                                currentScore += 10
+                                consecutiveFails = 0
+                                message = "¡Adivinaste! 🎉"
+                                messageColor = Color(0xFF4CAF50)
+                                vibrateSafe(context, 200)
+                                MediaPlayer.create(context, Settings.System.DEFAULT_NOTIFICATION_URI).start()
+                            } else {
+                                consecutiveFails++
+                                message = "Fallaste. Era $randomNumber."
+                                messageColor = Color(0xFFF44336)
+                                vibrateSafe(context, 400)
+
+                                if (consecutiveFails == 5) {
+                                    currentScore = 0
+                                    consecutiveFails = 0
+                                    message = "Perdiste. Puntaje reiniciado."
+                                    messageColor = Color.Gray
+                                }
                             }
-                        }
 
-                        guessInput = ""
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(55.dp)
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text("Adivinar", color = Color.White, fontSize = 18.sp)
+                            if (currentScore > maxScore) {
+                                maxScore = currentScore
+                                coroutineScope.launch {
+                                    prefs.edit { putInt("MAX_SCORE", maxScore) }
+                                }
+                            }
+
+                            guessInput = ""
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp)
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Text("Adivinar", color = Color.White, fontSize = 18.sp)
+                    }
+
+                    Button(
+                        onClick = {
+                            currentScore = 0
+                            consecutiveFails = 0
+                            message = "Juego reiniciado."
+                            messageColor = Color.Gray
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp)
+                            .padding(vertical = 4.dp)
+                    ) {
+                        Text("Reiniciar juego", color = Color.White, fontSize = 18.sp)
+                    }
                 }
 
-                Button(
-                    onClick = {
-                        currentScore = 0
-                        consecutiveFails = 0
-                        message = "Juego reiniciado."
-                        messageColor = Color.Gray
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(55.dp)
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text("Reiniciar juego", color = Color.White, fontSize = 18.sp)
+                if (message.isNotEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .background(animatedMessageColor, shape = RoundedCornerShape(12.dp))
+                            .padding(16.dp)
+                    ) {
+                        Text(message, fontSize = 18.sp, color = Color.White)
+                    }
                 }
             }
-
-            if (message.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.85f)
-                        .background(animatedMessageColor, shape = RoundedCornerShape(12.dp))
-                        .padding(16.dp)
-                ) {
-                    Text(message, fontSize = 18.sp, color = Color.White)
-                }
-            }
-
         }
     }
 }

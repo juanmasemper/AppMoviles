@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.example.tp2appmoviles.ui.theme.TP2appmovilesTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
+import com.example.tp2appmoviles.ui.components.SharedBackground
 
 
 class MainActivity : ComponentActivity() {
@@ -36,15 +37,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     val context = LocalContext.current
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB))
-                )
-            )
-    ) {
+SharedBackground {
         Column(
             modifier = Modifier
                 .fillMaxSize()
