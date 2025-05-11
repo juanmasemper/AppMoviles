@@ -27,6 +27,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.graphics.Color
 import com.example.tp2appmoviles.ui.components.SharedBackground
+import com.example.tp2appmoviles.ui.components.SearchResultCard
 
 
 class CapitalsActivity : ComponentActivity() {
@@ -149,13 +150,9 @@ fun CapitalsScreen() {
                     Text("Buscar")
                 }
 
-                Text(
-                    text = searchResult,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(16.dp)
-                )
+                if (searchResult.isNotBlank()) {
+                    SearchResultCard(searchResult = searchResult)
+                }
             }
         }
     }
