@@ -9,9 +9,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +30,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.graphics.Color
 import com.example.tp2appmoviles.ui.components.SharedBackground
 import com.example.tp2appmoviles.ui.components.SearchResultCard
+import androidx.compose.material3.Text
+import androidx.compose.ui.unit.sp
 
 
 class CapitalsActivity : ComponentActivity() {
@@ -118,9 +122,14 @@ fun CapitalsScreen() {
                             showToast(context, "Población inválida") // Corregido "Invalida"
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                        .padding(vertical = 4.dp)
                 ) {
-                    Text("Agregar Capital")
+                    Text("Agregar Capital", color = Color.White, fontSize = 18.sp)
                 }
 
                 HorizontalDivider( // Divider actualizado
@@ -145,9 +154,14 @@ fun CapitalsScreen() {
                             "País: ${it.country}\nCapital: ${it.cityName}\nPoblación: ${it.population}"
                         } ?: "Capital no encontrada"
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                        .padding(vertical = 4.dp)
                 ) {
-                    Text("Buscar")
+                    Text("Buscar", color = Color.White, fontSize = 18.sp)
                 }
 
                 if (searchResult.isNotBlank()) {
