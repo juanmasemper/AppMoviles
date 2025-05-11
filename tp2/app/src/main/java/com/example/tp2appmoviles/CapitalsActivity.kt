@@ -1,5 +1,7 @@
+
 package com.example.tp2appmoviles
 
+import android.app.Application
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -7,7 +9,6 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -30,13 +31,18 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.graphics.Color
 import com.example.tp2appmoviles.ui.components.SharedBackground
 import com.example.tp2appmoviles.ui.components.SearchResultCard
-import androidx.compose.material3.Text
 import androidx.compose.ui.unit.sp
 import androidx.activity.viewModels
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavHostController
+import com.example.tp2appmoviles.data.entities.CapitalCity
 import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModel
 import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModelFactory
+import com.example.tp2appmoviles.viewmodel.CapitalsViewModel
+import com.example.tp2appmoviles.viewmodel.CapitalsViewModelFactory
 
 
 class CapitalsActivity : ComponentActivity() {
@@ -63,7 +69,8 @@ class CapitalsActivity : ComponentActivity() {
 @Composable
 fun CapitalsScreen(
     navController: NavHostController,
-    themeViewModel: ThemeViewModel
+    themeViewModel: ThemeViewModel,
+    viewModel: CapitalsViewModel = viewModel(factory = CapitalsViewModelFactory(LocalContext.current.applicationContext as Application))
 ) {
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val context = LocalContext.current
@@ -72,20 +79,21 @@ fun CapitalsScreen(
     var population by remember { mutableStateOf("") }
     var searchQuery by remember { mutableStateOf("") }
     var searchResult by remember { mutableStateOf("") }
-    val capitals = remember { mutableStateListOf<CapitalCity>() }
+    val capitals by viewModel.allCapitals.collectAsState()
+    var deleteCity by remember { mutableStateOf("") }
+    var deleteCountry by remember { mutableStateOf("") }
+    var updateCity by remember { mutableStateOf("") }
+    var newPopulation by remember { mutableStateOf("") }
 
     SharedBackground(isDarkMode = isDarkMode) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    title = { Text("Gestión de Capitales") }, // Corregido "Gestion" -> "Gestión"
+                    title = { Text("Gestión de Capitales") },
                     navigationIcon = {
                         IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Versión actualizada
-                                contentDescription = "Volver"
-                            )
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                         }
                     }
                 )
@@ -95,6 +103,7 @@ fun CapitalsScreen(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -131,12 +140,19 @@ fun CapitalsScreen(
                         }
 
                         try {
-                            capitals.add(CapitalCity(country, city, population.toLong()))
+                            viewModel.addCapital(
+                                CapitalCity(
+                                    id = 0,
+                                    country = country,
+                                    cityName = city,
+                                    population = population.toLong()
+                                )
+                            )
                             country = ""
                             city = ""
                             population = ""
                             showToast(context, "Capital agregada!")
-                        } catch (e: NumberFormatException) {
+                        } catch (_: NumberFormatException) {
                             showToast(context, "Población inválida") // Corregido "Invalida"
                         }
                     },
@@ -185,6 +201,120 @@ fun CapitalsScreen(
                 if (searchResult.isNotBlank()) {
                     SearchResultCard(searchResult = searchResult)
                 }
+                HorizontalDivider( // Divider actualizado
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                // Sección Borrar por Ciudad
+                OutlinedTextField(
+                    value = deleteCity,
+                    onValueChange = { deleteCity = it },
+                    label = { Text("Nombre ciudad a borrar") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Button(
+                    onClick = {
+                        if (deleteCity.isNotBlank()) {
+                            viewModel.deleteByCity(deleteCity)
+                            deleteCity = ""
+                            showToast(context, "Ciudad borrada")
+                        } else {
+                            showToast(context, "Ingrese una ciudad")
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE57373)), // Rojo
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                ) {
+                    Text("Borrar Ciudad", color = Color.White, fontSize = 18.sp)
+                }
+
+                HorizontalDivider( // Divider actualizado
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                // Sección Borrar por País
+                OutlinedTextField(
+                    value = deleteCountry,
+                    onValueChange = { deleteCountry = it },
+                    label = { Text("País a borrar") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Button(
+                    onClick = {
+                        if (deleteCountry.isNotBlank()) {
+                            viewModel.deleteByCountry(deleteCountry)
+                            deleteCountry = ""
+                            showToast(context, "Capitales borradas")
+                        } else {
+                            showToast(context, "Ingrese un país")
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336)), // Rojo más intenso
+                    shape = RoundedCornerShape(50),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                ) {
+                    Text("Borrar Todas las Capitales del País", color = Color.White, fontSize = 18.sp)
+                }
+
+                HorizontalDivider( // Divider actualizado
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                // Sección Actualizar Población
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = updateCity,
+                        onValueChange = { updateCity = it },
+                        label = { Text("Ciudad a actualizar") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = newPopulation,
+                        onValueChange = { newPopulation = it },
+                        label = { Text("Nueva población") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Button(
+                        onClick = {
+                            if (updateCity.isNotBlank() && newPopulation.isNotBlank()) {
+                                val capital = capitals.find { it.cityName.equals(updateCity, true) }
+                                capital?.let {
+                                    viewModel.updatePopulation(
+                                        cityName = updateCity,
+                                        newPopulation = newPopulation.toLong()
+                                    )
+                                    updateCity = ""
+                                    newPopulation = ""
+                                    showToast(context, "Población actualizada")
+                                } ?: showToast(context, "Ciudad no encontrada")
+                            } else {
+                                showToast(context, "Complete ambos campos")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)), // Amarillo
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(55.dp)
+                    ) {
+                        Text("Actualizar Población", color = Color.White, fontSize = 18.sp)
+                    }
+                }
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outline
+                )
             }
         }
     }

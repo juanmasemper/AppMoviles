@@ -28,12 +28,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.tp2appmoviles.data.database.AppDatabase
 import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModel
 import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppDatabase.getDatabase(this)
 
         // Inicializar el ViewModel
         val themeViewModel: ThemeViewModel by viewModels { ThemeViewModelFactory(this) }
