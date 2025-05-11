@@ -53,6 +53,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.core.ktx)

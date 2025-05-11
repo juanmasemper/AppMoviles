@@ -32,14 +32,28 @@ import com.example.tp2appmoviles.ui.components.SharedBackground
 import com.example.tp2appmoviles.ui.components.SearchResultCard
 import androidx.compose.material3.Text
 import androidx.compose.ui.unit.sp
+import androidx.activity.viewModels
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
+import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModel
+import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModelFactory
 
 
 class CapitalsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val themeViewModel: ThemeViewModel by viewModels { ThemeViewModelFactory(this) }
+
         setContent {
-            TP2appmovilesTheme {
-                CapitalsScreen()
+            val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+            val navController = rememberNavController()
+
+            TP2appmovilesTheme(darkTheme = isDarkMode) {
+                CapitalsScreen(
+                    navController = navController,
+                    themeViewModel = themeViewModel
+                )
             }
         }
     }
@@ -47,7 +61,11 @@ class CapitalsActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CapitalsScreen() {
+fun CapitalsScreen(
+    navController: NavHostController,
+    themeViewModel: ThemeViewModel
+) {
+    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val context = LocalContext.current
     var country by remember { mutableStateOf("") }
     var city by remember { mutableStateOf("") }
@@ -56,14 +74,14 @@ fun CapitalsScreen() {
     var searchResult by remember { mutableStateOf("") }
     val capitals = remember { mutableStateListOf<CapitalCity>() }
 
-    SharedBackground {
+    SharedBackground(isDarkMode = isDarkMode) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
                     title = { Text("Gestión de Capitales") }, // Corregido "Gestion" -> "Gestión"
                     navigationIcon = {
-                        IconButton(onClick = { (context as ComponentActivity).finish() }) {
+                        IconButton(onClick = { navController.navigateUp() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Versión actualizada
                                 contentDescription = "Volver"
@@ -81,7 +99,7 @@ fun CapitalsScreen() {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Sección para agregar capitales
-                Text("Agregar nueva capital", style = MaterialTheme.typography.titleMedium)
+                Text("Agregar nueva capital", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.titleMedium)
 
                 OutlinedTextField(
                     value = country,
@@ -138,7 +156,7 @@ fun CapitalsScreen() {
                 )
 
                 // Sección para buscar capitales
-                Text("Buscar capital", style = MaterialTheme.typography.titleMedium)
+                Text("Buscar capital", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.titleMedium)
 
                 OutlinedTextField(
                     value = searchQuery,

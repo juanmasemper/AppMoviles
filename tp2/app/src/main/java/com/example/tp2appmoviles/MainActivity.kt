@@ -1,5 +1,6 @@
 package com.example.tp2appmoviles
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import android.content.Intent
@@ -20,24 +21,65 @@ import com.example.tp2appmoviles.ui.theme.TP2appmovilesTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Button
 import com.example.tp2appmoviles.ui.components.SharedBackground
-
+import androidx.compose.runtime.*
+import androidx.core.content.edit
+import androidx.activity.viewModels
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModel
+import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Inicializar el ViewModel
+        val themeViewModel: ThemeViewModel by viewModels { ThemeViewModelFactory(this) }
+
         setContent {
-            TP2appmovilesTheme {
-                MainScreen()
+            val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+
+            TP2appmovilesTheme(darkTheme = isDarkMode) {
+                // Navegación con ViewModel compartido
+                val navController = rememberNavController()
+                NavHost(
+                    navController = navController,
+                    startDestination = "main_screen"
+                ) {
+                    composable("main_screen") {
+                        MainScreen(
+                            navController = navController,
+                            themeViewModel = themeViewModel
+                        )
+                    }
+                    composable("guess_game") {
+                        GuessNumberGame(
+                            navController = navController,
+                            themeViewModel = themeViewModel
+                        )
+                    }
+                    composable("capitals") {
+                        CapitalsScreen(
+                            navController = navController,
+                            themeViewModel = themeViewModel
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun MainScreen() {
-    val context = LocalContext.current
+fun MainScreen(
+    navController: NavHostController,
+    themeViewModel: ThemeViewModel
+) {
+    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
 
-SharedBackground {
+    SharedBackground(isDarkMode = isDarkMode) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -45,11 +87,8 @@ SharedBackground {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Botón para el juego
             Button(
-                onClick = {
-                    context.startActivity(Intent(context, GuessNumberActivity::class.java))
-                },
+                onClick = { navController.navigate("guess_game") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -61,11 +100,8 @@ SharedBackground {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón para capitales
             Button(
-                onClick = {
-                    context.startActivity(Intent(context, CapitalsActivity::class.java))
-                },
+                onClick = { navController.navigate("capitals") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp),
@@ -74,6 +110,31 @@ SharedBackground {
             ) {
                 Text("Gestión de Capitales", fontSize = 18.sp, color = Color.White)
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Botón para alternar el tema
+            Button(
+                onClick = { themeViewModel.toggleTheme() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Text(
+                    if (isDarkMode) "Modo Claro" else "Modo Oscuro",
+                    fontSize = 18.sp,
+                    color = Color.White
+                )
+            }
         }
+    }
+}
+
+fun saveThemePreference(context: Context, isDarkMode: Boolean) {
+    val sharedPreferences = context.getSharedPreferences("user_preferences", Context.MODE_PRIVATE)
+    sharedPreferences.edit() {
+        putBoolean("isDarkMode", isDarkMode)
     }
 }

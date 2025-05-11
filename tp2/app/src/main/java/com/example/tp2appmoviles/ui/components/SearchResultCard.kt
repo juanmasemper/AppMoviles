@@ -19,7 +19,7 @@ fun SearchResultCard(searchResult: String) {
             .fillMaxWidth()
             .padding(vertical = 16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.85f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
@@ -28,7 +28,7 @@ fun SearchResultCard(searchResult: String) {
             text = searchResult,
             modifier = Modifier.padding(16.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

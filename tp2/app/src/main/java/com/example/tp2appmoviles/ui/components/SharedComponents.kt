@@ -9,15 +9,21 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun SharedBackground(content: @Composable () -> Unit) {
+fun SharedBackground(isDarkMode: Boolean, content: @Composable () -> Unit) {
+    val colors = if (isDarkMode) {
+        Brush.verticalGradient(
+            listOf(Color(0xFF212121), Color(0xFF424242)) // Tonos oscuros
+        )
+    } else {
+        Brush.verticalGradient(
+            listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB)) // Tonos claros
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFE3F2FD), Color(0xFFBBDEFB))
-                )
-            )
+            .background(colors)
     ) {
         content()
     }

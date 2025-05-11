@@ -36,21 +36,39 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.Icons
+import androidx.activity.viewModels
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
+import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModel
+import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModelFactory
 
 class GuessNumberActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val themeViewModel: ThemeViewModel by viewModels { ThemeViewModelFactory(this) }
+
         setContent {
-            TP2appmovilesTheme {
-                GuessNumberGame()
+            val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+            val navController = rememberNavController()
+
+            TP2appmovilesTheme(darkTheme = isDarkMode) {
+                GuessNumberGame(
+                    navController = navController,
+                    themeViewModel = themeViewModel
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GuessNumberGame() {
+@OptIn(ExperimentalMaterial3Api::class)
+fun GuessNumberGame(
+    navController: NavHostController,
+    themeViewModel: ThemeViewModel
+) {
+    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("game_prefs", Context.MODE_PRIVATE)
     val coroutineScope = rememberCoroutineScope()
@@ -68,14 +86,14 @@ fun GuessNumberGame() {
 
     val animatedMessageColor by animateColorAsState(targetValue = messageColor)
 
-    SharedBackground {
+    SharedBackground(isDarkMode = isDarkMode) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
                     title = { Text("Adivina el Número") },
                     navigationIcon = {
-                        IconButton(onClick = { (context as ComponentActivity).finish() }) {
+                        IconButton(onClick = { navController.navigateUp() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Volver",
@@ -94,9 +112,9 @@ fun GuessNumberGame() {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Puntaje: $currentScore", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                    Text("Máximo puntaje: $maxScore", fontSize = 24.sp)
-                    Text("Fallos seguidos: $consecutiveFails / 5", fontSize = 18.sp)
+                    Text("Puntaje: $currentScore", color = MaterialTheme.colorScheme.onBackground, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                    Text("Máximo puntaje: $maxScore", color = MaterialTheme.colorScheme.onBackground, fontSize = 24.sp)
+                    Text("Fallos seguidos: $consecutiveFails / 5", color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp)
                 }
 
                 OutlinedTextField(
