@@ -4,19 +4,22 @@
     <shared>
       <config />
     </shared>
-    <layouts>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
-        <config>
-          <theme>@style/Theme.TP2appmoviles</theme>
-        </config>
-      </layout>
-    </layouts>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4875b9e0-af2c-485a-a4c5-f4c11f48ac73" name="Changes" comment="" />
+    <list default="true" id="4875b9e0-af2c-485a-a4c5-f4c11f48ac73" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tp2/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/CapitalCity.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/CapitalsActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/CapitalsActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tp2/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/gradle/libs.versions.toml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -25,19 +28,61 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\juanm\.android\avd\Medium_Phone.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\USUARIO\.android\avd\Medium_Phone.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
     </projectState>
+    <projectState path="$PROJECT_DIR$/tp2">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="TP2appmoviles" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="layoutResourceFile_vertical" />
+        <option value="Kotlin Class" />
+        <option value="Kotlin File" />
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "lucaasdiez"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/juanmasemper/AppMoviles.git",
+    "accountId": "a45d82ce-adb9-4d5a-916f-34a2701ed4dc"
+  }
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -45,20 +90,27 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2whFWoH9fGivKrpqaEiK3E5ipgG" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Android App.app.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "ScreenRecorder.SavePath": "C:\\Users\\USUARIO\\Desktop",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "feature/gestion-capitales",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/juanm/AndroidStudioProjects/TP2appmoviles",
+    "last_opened_file_path": "C:/Users/USUARIO/Desktop",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.17",
     "project.structure.side.proportion": "0.2"
@@ -67,6 +119,9 @@
   <component name="RecentsManager">
     <key name="android.template.1748434539">
       <recent name="com.example.tp2appmoviles" />
+    </key>
+    <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
+      <recent name="com.example.tp2appmoviles.data.entities" />
     </key>
   </component>
   <component name="RunManager">
@@ -159,12 +214,12 @@
       <map>
         <entry key="com.example.tp2appmoviles">
           <value>
-            <CheckInfo lastCheckTimestamp="1746631897841" />
+            <CheckInfo lastCheckTimestamp="1746997157234" />
           </value>
         </entry>
         <entry key="com.example.tp2appmoviles.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1746631897842" />
+            <CheckInfo lastCheckTimestamp="1746997157233" />
           </value>
         </entry>
       </map>
