@@ -1,65 +1,85 @@
-
 package com.example.tp2appmoviles
 
 import android.app.Application
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.tp2appmoviles.ui.theme.TP2appmovilesTheme
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.graphics.Color
-import com.example.tp2appmoviles.ui.components.SharedBackground
-import com.example.tp2appmoviles.ui.components.SearchResultCard
 import androidx.compose.ui.unit.sp
-import androidx.activity.viewModels
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.tp2appmoviles.data.entities.CapitalCity
+import com.example.tp2appmoviles.ui.components.SearchResultCard
+import com.example.tp2appmoviles.ui.components.SharedBackground
+import com.example.tp2appmoviles.ui.theme.TP2appmovilesTheme
 import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModel
 import com.example.tp2appmoviles.ui.viewmodel.ThemeViewModelFactory
 import com.example.tp2appmoviles.viewmodel.CapitalsViewModel
 import com.example.tp2appmoviles.viewmodel.CapitalsViewModelFactory
 
-
 class CapitalsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         val themeViewModel: ThemeViewModel by viewModels { ThemeViewModelFactory(this) }
-
         setContent {
             val isDarkMode by themeViewModel.isDarkMode.collectAsState()
             val navController = rememberNavController()
-
             TP2appmovilesTheme(darkTheme = isDarkMode) {
-                CapitalsScreen(
-                    navController = navController,
-                    themeViewModel = themeViewModel
-                )
+                CapitalsScreen(navController, themeViewModel)
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpandableSection(title: String, content: @Composable () -> Unit) {
+    var expanded by remember { mutableStateOf(true) }
+
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        AnimatedVisibility(visible = expanded) {
+            Column(modifier = Modifier.padding(top = 8.dp)) {
+                content()
+                Spacer(modifier = Modifier.height(12.dp)) // margen final
             }
         }
     }
@@ -93,7 +113,7 @@ fun CapitalsScreen(
                     title = { Text("Gestión de Capitales") },
                     navigationIcon = {
                         IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
                         }
                     }
                 )
@@ -105,178 +125,105 @@ fun CapitalsScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Sección para agregar capitales
-                Text("Agregar nueva capital", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.titleMedium)
-
-                OutlinedTextField(
-                    value = country,
-                    onValueChange = { country = it },
-                    label = { Text("País") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = city,
-                    onValueChange = { city = it },
-                    label = { Text("Capital") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                OutlinedTextField(
-                    value = population,
-                    onValueChange = { population = it },
-                    label = { Text("Población") }, // Corregido "Poblacion"
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Button(
-                    onClick = {
-                        if (country.isBlank() || city.isBlank() || population.isBlank()) {
-                            showToast(context, "Complete todos los campos")
-                            return@Button
-                        }
-
-                        try {
-                            viewModel.addCapital(
-                                CapitalCity(
-                                    id = 0,
-                                    country = country,
-                                    cityName = city,
-                                    population = population.toLong()
-                                )
-                            )
-                            country = ""
-                            city = ""
-                            population = ""
-                            showToast(context, "Capital agregada!")
-                        } catch (_: NumberFormatException) {
-                            showToast(context, "Población inválida") // Corregido "Invalida"
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(55.dp)
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text("Agregar Capital", color = Color.White, fontSize = 18.sp)
-                }
-
-                HorizontalDivider( // Divider actualizado
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = MaterialTheme.colorScheme.outline
-                )
-
-                // Sección para buscar capitales
-                Text("Buscar capital", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.titleMedium)
-
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text("Nombre de la capital") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Button(
-                    onClick = {
-                        val capital = capitals.find { it.cityName.equals(searchQuery, true) }
-                        searchResult = capital?.let {
-                            "País: ${it.country}\nCapital: ${it.cityName}\nPoblación: ${it.population}"
-                        } ?: "Capital no encontrada"
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(55.dp)
-                        .padding(vertical = 4.dp)
-                ) {
-                    Text("Buscar", color = Color.White, fontSize = 18.sp)
-                }
-
-                if (searchResult.isNotBlank()) {
-                    SearchResultCard(searchResult = searchResult)
-                }
-                HorizontalDivider( // Divider actualizado
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = MaterialTheme.colorScheme.outline
-                )
-
-                // Sección Borrar por Ciudad
-                OutlinedTextField(
-                    value = deleteCity,
-                    onValueChange = { deleteCity = it },
-                    label = { Text("Nombre ciudad a borrar") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Button(
-                    onClick = {
-                        if (deleteCity.isNotBlank()) {
-                            viewModel.deleteByCity(deleteCity)
-                            deleteCity = ""
-                            showToast(context, "Ciudad borrada")
-                        } else {
-                            showToast(context, "Ingrese una ciudad")
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE57373)), // Rojo
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(55.dp)
-                ) {
-                    Text("Borrar Ciudad", color = Color.White, fontSize = 18.sp)
-                }
-
-                HorizontalDivider( // Divider actualizado
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = MaterialTheme.colorScheme.outline
-                )
-
-                // Sección Borrar por País
-                OutlinedTextField(
-                    value = deleteCountry,
-                    onValueChange = { deleteCountry = it },
-                    label = { Text("País a borrar") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Button(
-                    onClick = {
-                        if (deleteCountry.isNotBlank()) {
-                            viewModel.deleteByCountry(deleteCountry)
-                            deleteCountry = ""
-                            showToast(context, "Capitales borradas")
-                        } else {
-                            showToast(context, "Ingrese un país")
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336)), // Rojo más intenso
-                    shape = RoundedCornerShape(50),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(55.dp)
-                ) {
-                    Text("Borrar Todas las Capitales del País", color = Color.White, fontSize = 18.sp)
-                }
-
-                HorizontalDivider( // Divider actualizado
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = MaterialTheme.colorScheme.outline
-                )
-
-                // Sección Actualizar Población
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExpandableSection("Agregar nueva capital") {
+                    OutlinedTextField(value = country, onValueChange = { country = it }, label = { Text("País") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(value = city, onValueChange = { city = it }, label = { Text("Capital") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(
-                        value = updateCity,
-                        onValueChange = { updateCity = it },
-                        label = { Text("Ciudad a actualizar") },
+                        value = population,
+                        onValueChange = { population = it },
+                        label = { Text("Población") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            if (country.isBlank() || city.isBlank() || population.isBlank()) {
+                                showToast(context, "Complete todos los campos"); return@Button
+                            }
+                            try {
+                                viewModel.addCapital(CapitalCity(0, country, city, population.toLong()))
+                                country = ""; city = ""; population = ""
+                                showToast(context, "Capital agregada!")
+                            } catch (_: NumberFormatException) {
+                                showToast(context, "Población inválida")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.fillMaxWidth().height(55.dp)
+                    ) {
+                        Text("Agregar Capital", color = Color.White, fontSize = 18.sp)
+                    }
+                }
 
+                ExpandableSection("Buscar capital") {
+                    OutlinedTextField(value = searchQuery, onValueChange = { searchQuery = it }, label = { Text("Nombre de la capital") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            val capital = capitals.find { it.cityName.equals(searchQuery, true) }
+                            searchResult = capital?.let {
+                                "País: ${it.country}\nCapital: ${it.cityName}\nPoblación: ${it.population}"
+                            } ?: "Capital no encontrada"
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5)),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.fillMaxWidth().height(55.dp)
+                    ) {
+                        Text("Buscar", color = Color.White, fontSize = 18.sp)
+                    }
+                    if (searchResult.isNotBlank()) {
+                        SearchResultCard(searchResult = searchResult)
+                    }
+                }
+
+                ExpandableSection("Borrar por ciudad") {
+                    OutlinedTextField(value = deleteCity, onValueChange = { deleteCity = it }, label = { Text("Nombre ciudad a borrar") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            if (deleteCity.isNotBlank()) {
+                                viewModel.deleteByCity(deleteCity)
+                                deleteCity = ""
+                                showToast(context, "Ciudad borrada")
+                            } else {
+                                showToast(context, "Ingrese una ciudad")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE57373)),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.fillMaxWidth().height(55.dp)
+                    ) {
+                        Text("Borrar Ciudad", color = Color.White, fontSize = 18.sp)
+                    }
+                }
+
+                ExpandableSection("Borrar por país") {
+                    OutlinedTextField(value = deleteCountry, onValueChange = { deleteCountry = it }, label = { Text("País a borrar") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            if (deleteCountry.isNotBlank()) {
+                                viewModel.deleteByCountry(deleteCountry)
+                                deleteCountry = ""
+                                showToast(context, "Capitales borradas")
+                            } else {
+                                showToast(context, "Ingrese un país")
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF44336)),
+                        shape = RoundedCornerShape(50),
+                        modifier = Modifier.fillMaxWidth().height(55.dp)
+                    ) {
+                        Text("Borrar Todas las Capitales del País", color = Color.White, fontSize = 18.sp)
+                    }
+                }
+
+                ExpandableSection("Actualizar población") {
+                    OutlinedTextField(value = updateCity, onValueChange = { updateCity = it }, label = { Text("Ciudad a actualizar") }, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(
                         value = newPopulation,
                         onValueChange = { newPopulation = it },
@@ -284,42 +231,32 @@ fun CapitalsScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth()
                     )
-
+                    Spacer(modifier = Modifier.height(8.dp))
                     Button(
                         onClick = {
                             if (updateCity.isNotBlank() && newPopulation.isNotBlank()) {
                                 val capital = capitals.find { it.cityName.equals(updateCity, true) }
                                 capital?.let {
-                                    viewModel.updatePopulation(
-                                        cityName = updateCity,
-                                        newPopulation = newPopulation.toLong()
-                                    )
-                                    updateCity = ""
-                                    newPopulation = ""
+                                    viewModel.updatePopulation(updateCity, newPopulation.toLong())
+                                    updateCity = ""; newPopulation = ""
                                     showToast(context, "Población actualizada")
                                 } ?: showToast(context, "Ciudad no encontrada")
                             } else {
                                 showToast(context, "Complete ambos campos")
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)), // Amarillo
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)),
                         shape = RoundedCornerShape(50),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(55.dp)
+                        modifier = Modifier.fillMaxWidth().height(55.dp)
                     ) {
                         Text("Actualizar Población", color = Color.White, fontSize = 18.sp)
                     }
                 }
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = MaterialTheme.colorScheme.outline
-                )
             }
         }
     }
 }
 
 private fun showToast(context: Context, message: String) {
-    android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
