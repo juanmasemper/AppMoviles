@@ -1,15 +1,27 @@
-import React, {useState} from 'react';
-import { View, Text, StyleSheet, Alert, SafeAreaView, FlatList } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  SafeAreaView,
+  FlatList,
+  Button,
+} from 'react-native';
 import SearchBar from '../components/SearchBar';
 import { searchRecipesByName, Meal } from '../services/RecipeApi';
 import RecipeCard from '../components/RecipeCard';
-import { useRouter } from 'expo-router'; 
+import { useRouter } from 'expo-router';
+import { useThemeContext } from '../../hooks/ThemeContext';
 
 const HomeScreen = () => {
   const [recipes, setRecipes] = useState<Meal[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  const { theme, toggleTheme } = useThemeContext();
+  const isDark = theme === 'dark';
 
   const handleRecipeSearch = async (query: string) => {
     if (!query.trim()) {
@@ -22,11 +34,11 @@ const HomeScreen = () => {
       const results = await searchRecipesByName(query);
       setRecipes(results);
       if (results.length === 0) {
-        Alert.alert("Sin resultados", "No se encontraron recetas para tu búsqueda.");
+        Alert.alert('Sin resultados', 'No se encontraron recetas para tu búsqueda.');
       }
     } catch (err) {
-      setError("Error al buscar recetas. Intenta de nuevo.");
-      Alert.alert("Error", "No se pudieron cargar las recetas.");
+      setError('Error al buscar recetas. Intenta de nuevo.');
+      Alert.alert('Error', 'No se pudieron cargar las recetas.');
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -36,23 +48,46 @@ const HomeScreen = () => {
   const handleRecipePress = (recipe: Meal) => {
     if (recipe && recipe.idMeal) {
       router.push({
-        pathname: "/recipe/[id]", 
+        pathname: '/recipe/[id]',
         params: { id: recipe.idMeal },
       });
     } else {
-      console.error("Error: recipe.idMeal es undefined o inválido.", recipe);
-      Alert.alert("Error de Navegación", "No se pudo obtener el ID de la receta para navegar.");
+      console.error('Error: recipe.idMeal es undefined o inválido.', recipe);
+      Alert.alert(
+        'Error de Navegación',
+        'No se pudo obtener el ID de la receta para navegar.'
+      );
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        { backgroundColor: isDark ? '#121212' : '#f8f8f8' },
+      ]}
+    >
       <View style={styles.container}>
-        <Text style={styles.title}>App de recetas</Text>
+        <Text style={[styles.title, { color: isDark ? '#fff' : '#000' }]}>
+          App de recetas
+        </Text>
+
+        <Button
+          title={`Cambiar a modo ${isDark ? 'claro ☀️' : 'oscuro 🌙'}`}
+          onPress={toggleTheme}
+          color={isDark ? '#bb86fc' : '#6200ee'}
+        />
+
         <SearchBar onSearch={handleRecipeSearch} placeholder="Buscar por nombre" />
 
-        {isLoading && <Text style={styles.loadingText}>Buscando...</Text>}
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        {isLoading && (
+          <Text style={[styles.loadingText, { color: isDark ? '#ccc' : '#333' }]}>
+            Buscando...
+          </Text>
+        )}
+        {error && (
+          <Text style={[styles.errorText, { color: 'red' }]}>{error}</Text>
+        )}
 
         <FlatList
           data={recipes}
@@ -60,13 +95,17 @@ const HomeScreen = () => {
           renderItem={({ item }) => (
             <RecipeCard recipe={item} onPress={() => handleRecipePress(item)} />
           )}
-          ListEmptyComponent={() => (
+          ListEmptyComponent={() =>
             !isLoading && recipes.length === 0 && !error ? (
-              <Text style={styles.emptyText}>Ingresa un término para buscar recetas.</Text>
+              <Text
+                style={[styles.emptyText, { color: isDark ? '#aaa' : '#666' }]}
+              >
+                Ingresa un término para buscar recetas.
+              </Text>
             ) : null
-          )}
+          }
           style={styles.list}
-          contentContainerStyle={styles.listContentContainer} 
+          contentContainerStyle={styles.listContentContainer}
         />
       </View>
     </SafeAreaView>
@@ -76,17 +115,16 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f8f8', 
   },
   container: {
     flex: 1,
     paddingTop: 50,
+    paddingHorizontal: 16,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    marginVertical: 0,
     textAlign: 'center',
     marginTop: 20,
   },
@@ -96,7 +134,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   errorText: {
-    color: 'red',
     marginTop: 10,
     textAlign: 'center',
     marginHorizontal: 20,
@@ -111,8 +148,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 50,
     fontSize: 16,
-    color: '#666',
-  }
+  },
 });
 
 export default HomeScreen;
