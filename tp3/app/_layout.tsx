@@ -5,7 +5,6 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { AppProvider } from './context/AppContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -18,16 +17,13 @@ export default function RootLayout() {
     return null;
   }
 
-   return (
-    <AppProvider> {/* ➡️ Envolver toda la app con el provider */}
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-          <Stack.Screen name="recipe/[id]" options={{ title: 'Detalle' }} /> {/* ➡️ Añadir esta línea */}
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </AppProvider>
+  return (
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+    </ThemeProvider>
   );
 }
