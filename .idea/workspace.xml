@@ -10,15 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4875b9e0-af2c-485a-a4c5-f4c11f48ac73" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_11_5_2025_17_29_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_11_5_2025_17_29__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tp2/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/CapitalCity.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/CapitalsActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/CapitalsActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/app/src/main/java/com/example/tp2appmoviles/MainActivity.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tp2/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/tp2/gradle/libs.versions.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,7 +24,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\USUARIO\.android\avd\Medium_Phone.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\agust\.android\avd\Medium_Phone.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -71,16 +67,16 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "lucaasdiez"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;lucaasdiez&quot;
   }
-}]]></component>
+}</component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/juanmasemper/AppMoviles.git",
-    "accountId": "a45d82ce-adb9-4d5a-916f-34a2701ed4dc"
+    "accountId": "7ffed81d-081b-447d-b4ab-fe1fdf5eac54"
   }
 }]]></component>
   <component name="ProblemsViewState">
@@ -107,7 +103,7 @@
     "ScreenRecorder.SavePath": "C:\\Users\\USUARIO\\Desktop",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "feature/gestion-capitales",
+    "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/USUARIO/Desktop",

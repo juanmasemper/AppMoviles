@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Alert, To
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { getRecipeDetailsById, Meal } from '../services/RecipeApi';
 import { Ionicons } from '@expo/vector-icons';
+import FavoriteButton from '../components/FavoriteButton';
 
 const RecipeDetailScreen = () => {
   const { id } = useLocalSearchParams<{ id: string }>(); 
@@ -82,10 +83,23 @@ const RecipeDetailScreen = () => {
 
   return (
     <>
-      <Stack.Screen options={{ title: recipe.strMeal || 'Detalle de Receta' }} />
+      <Stack.Screen 
+        options={{ 
+          title: recipe.strMeal || 'Detalle de Receta',
+        }} 
+      />
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <Image source={{ uri: recipe.strMealThumb }} style={styles.image} />
-        <Text style={styles.title}>{recipe.strMeal}</Text>
+
+        <View style={styles.titleContainer}>
+          <View style={styles.placeholderButton} />
+          <View style={styles.titleWrapper}>
+            <Text style={styles.title}>{recipe.strMeal}</Text>
+          </View>
+          <View style={styles.favoriteButtonContainer}>
+            <FavoriteButton recipe={recipe} size={28} />
+          </View>
+        </View>
 
         {recipe.strCategory && <Text style={styles.subtitle}>Categoría: {recipe.strCategory}</Text>}
         {recipe.strArea && <Text style={styles.subtitle}>Origen: {recipe.strArea}</Text>}
@@ -131,12 +145,31 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingHorizontal: 5,
+  },
+  placeholderButton: {
+    width: 44,
+    height: 44,
+  },
+  titleWrapper: {
+    flex: 1,
+    alignItems: 'center',
+  },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
     color: '#333',
+    textAlign: 'center',
+  },
+  favoriteButtonContainer: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   subtitle: {
     fontSize: 16,

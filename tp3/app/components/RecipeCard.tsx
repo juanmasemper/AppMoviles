@@ -1,16 +1,22 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Meal } from '../services/RecipeApi'; 
+import FavoriteButton from './FavoriteButton';
 
 interface RecipeCardProps {
   recipe: Meal;
-  onPress: () => void; 
+  onPress: () => void;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image source={{ uri: recipe.strMealThumb }} style={styles.image} />
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: recipe.strMealThumb }} style={styles.image} />
+        <View style={styles.favoriteButtonContainer}>
+          <FavoriteButton recipe={recipe} />
+        </View>
+      </View>
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{recipe.strMeal}</Text>
         {recipe.strCategory && <Text style={styles.category}>Categoría: {recipe.strCategory}</Text>}
@@ -24,19 +30,27 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    overflow: 'hidden', 
+    overflow: 'hidden',
     marginBottom: 20,
     marginHorizontal: 15,
-    elevation: 3, 
-    shadowColor: '#000', 
+    elevation: 3,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    flexDirection: 'column', 
+    flexDirection: 'column',
+  },
+  imageContainer: {
+    position: 'relative',
   },
   image: {
     width: '100%',
-    height: 200, 
+    height: 200,
+  },
+  favoriteButtonContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
   },
   infoContainer: {
     padding: 15,
