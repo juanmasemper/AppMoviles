@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useNavigation } from 'expo-router';
 import { getRecipeDetailsById, Meal } from '../services/RecipeApi';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext } from '../../hooks/ThemeContext';
@@ -24,6 +24,16 @@ const RecipeDetailScreen = () => {
 
   const { theme } = useThemeContext();
   const isDark = theme === 'dark';
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: isLoading ? 'Cargando...' : (recipe?.strMeal || 'Detalle de Receta'),
+      headerBackTitle: 'Volver',
+      headerStyle: { backgroundColor: isDark ? '#121212' : '#fff' },
+      headerTintColor: isDark ? '#fff' : '#000',
+    });
+  }, [navigation, isLoading, recipe?.strMeal, isDark]);
 
   useEffect(() => {
     if (id) {
@@ -98,7 +108,7 @@ const RecipeDetailScreen = () => {
     <>
       <Stack.Screen
         options={{
-          title: recipe.strMeal || 'Detalle de Receta',
+          title: isLoading ? 'Cargando...' : (recipe?.strMeal || 'Detalle de Receta'),
           headerBackTitle: 'Volver',
           headerStyle: { backgroundColor: isDark ? '#121212' : '#fff' },
           headerTintColor: isDark ? '#fff' : '#000',

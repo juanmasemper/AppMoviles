@@ -1,43 +1,76 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Ionicons } from '@expo/vector-icons';
+import { useThemeContext } from '../../hooks/ThemeContext';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { theme } = useThemeContext();
+  const isDark = theme === 'dark';
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: isDark ? '#ff6b6b' : '#007bff',
+        tabBarInactiveTintColor: isDark ? '#888' : '#666',
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
+            backgroundColor: isDark ? 'rgba(30, 30, 30, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+            borderTopColor: isDark ? 'rgba(51, 51, 51, 0.6)' : 'rgba(224, 224, 224, 0.6)',
+            borderTopWidth: 0.5,
             position: 'absolute',
           },
-          default: {},
+          android: {
+            backgroundColor: isDark ? '#1e1e1e' : '#fff',
+            borderTopColor: isDark ? '#333' : '#e0e0e0',
+            borderTopWidth: 1,
+            elevation: 8,
+          },
+          default: {
+            backgroundColor: isDark ? '#1e1e1e' : '#fff',
+            borderTopColor: isDark ? '#333' : '#e0e0e0',
+            borderTopWidth: 1,
+          },
         }),
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Buscar',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'search' : 'search-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Favoritos',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'heart' : 'heart-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Explorar',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? 'compass' : 'compass-outline'} 
+              size={24} 
+              color={color} 
+            />
+          ),
         }}
       />
     </Tabs>

@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFavorites } from '../context/FavoritesContext';
+import { useThemeContext } from '../../hooks/ThemeContext';
 import { Meal } from '../services/RecipeApi';
 
 interface FavoriteButtonProps {
@@ -16,16 +17,16 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   color = '#ff6b6b' 
 }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
+  const { theme } = useThemeContext();
+  const isDark = theme === 'dark';
   const isRecipeFavorite = isFavorite(recipe.idMeal);
 
   const handleToggleFavorite = async () => {
     try {
       if (isRecipeFavorite) {
         await removeFromFavorites(recipe.idMeal);
-        Alert.alert('Removido', 'Receta removida de favoritos');
       } else {
         await addToFavorites(recipe);
-        Alert.alert('Agregado', 'Receta agregada a favoritos');
       }
     } catch (error) {
       Alert.alert('Error', 'No se pudo actualizar favoritos');
@@ -35,7 +36,14 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={[
+        styles.button,
+        {
+          backgroundColor: isDark 
+            ? 'rgba(0, 0, 0, 0.6)' 
+            : 'rgba(255, 255, 255, 0.9)'
+        }
+      ]}
       onPress={handleToggleFavorite}
       activeOpacity={0.7}
     >
@@ -50,9 +58,8 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    padding: 4,
+    padding: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
