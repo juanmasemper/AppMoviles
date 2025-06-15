@@ -1,15 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, Alert, TouchableOpacity, Linking } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { getRecipeDetailsById, Meal } from '../services/RecipeApi';
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeContext } from '../../hooks/ThemeContext';
 import FavoriteButton from '../components/FavoriteButton';
 
 const RecipeDetailScreen = () => {
-  const { id } = useLocalSearchParams<{ id: string }>(); 
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [recipe, setRecipe] = useState<Meal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { theme } = useThemeContext();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     if (id) {
@@ -41,25 +55,25 @@ const RecipeDetailScreen = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, { backgroundColor: isDark ? '#121212' : '#fff' }]}>
         <ActivityIndicator size="large" color="#007bff" />
-        <Text>Cargando detalles...</Text>
+        <Text style={{ color: isDark ? '#fff' : '#000' }}>Cargando detalles...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>{error}</Text>
+      <View style={[styles.centered, { backgroundColor: isDark ? '#121212' : '#fff' }]}>
+        <Text style={[styles.errorText, { color: 'red' }]}>{error}</Text>
       </View>
     );
   }
 
   if (!recipe) {
     return (
-      <View style={styles.centered}>
-        <Text>No hay información de la receta disponible.</Text>
+      <View style={[styles.centered, { backgroundColor: isDark ? '#121212' : '#fff' }]}>
+        <Text style={{ color: isDark ? '#fff' : '#000' }}>No hay información de la receta disponible.</Text>
       </View>
     );
   }
@@ -69,9 +83,9 @@ const RecipeDetailScreen = () => {
     for (let i = 1; i <= 20; i++) {
       const ingredient = recipe[`strIngredient${i}` as keyof Meal] as string;
       const measure = recipe[`strMeasure${i}` as keyof Meal] as string;
-      if (ingredient && ingredient.trim() !== "") {
+      if (ingredient && ingredient.trim() !== '') {
         ingredients.push(
-          <Text key={i} style={styles.ingredient}>
+          <Text key={i} style={[styles.ingredient, { color: isDark ? '#ddd' : '#333' }]}>
             - {ingredient} ({measure})
           </Text>
         );
@@ -80,46 +94,70 @@ const RecipeDetailScreen = () => {
     return ingredients;
   };
 
-
   return (
     <>
-      <Stack.Screen 
-        options={{ 
+      <Stack.Screen
+        options={{
           title: recipe.strMeal || 'Detalle de Receta',
-        }} 
+          headerBackTitle: 'Volver',
+          headerStyle: { backgroundColor: isDark ? '#121212' : '#fff' },
+          headerTintColor: isDark ? '#fff' : '#000',
+        }}
       />
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+
+      <ScrollView
+        style={[styles.container, { backgroundColor: isDark ? '#121212' : '#fff' }]}
+        contentContainerStyle={styles.contentContainer}
+      >
         <Image source={{ uri: recipe.strMealThumb }} style={styles.image} />
 
         <View style={styles.titleContainer}>
           <View style={styles.placeholderButton} />
           <View style={styles.titleWrapper}>
-            <Text style={styles.title}>{recipe.strMeal}</Text>
+            <Text style={[styles.title, { color: isDark ? '#fff' : '#333' }]}>
+          {recipe.strMeal}
+        </Text>
           </View>
           <View style={styles.favoriteButtonContainer}>
             <FavoriteButton recipe={recipe} size={28} />
           </View>
         </View>
 
-        {recipe.strCategory && <Text style={styles.subtitle}>Categoría: {recipe.strCategory}</Text>}
-        {recipe.strArea && <Text style={styles.subtitle}>Origen: {recipe.strArea}</Text>}
+        {recipe.strCategory && (
+          <Text style={[styles.subtitle, { color: isDark ? '#ccc' : '#555' }]}>
+            Categoría: {recipe.strCategory}
+          </Text>
+        )}
+        {recipe.strArea && (
+          <Text style={[styles.subtitle, { color: isDark ? '#ccc' : '#555' }]}>
+            Origen: {recipe.strArea}
+          </Text>
+        )}
 
-        <Text style={styles.sectionTitle}>Ingredientes:</Text>
+        <Text style={[styles.sectionTitle, { color: isDark ? '#fff' : '#444', borderBottomColor: isDark ? '#444' : '#eee' }]}>
+          Ingredientes:
+        </Text>
         {renderIngredients()}
 
-        <Text style={styles.sectionTitle}>Instrucciones:</Text>
-        <Text style={styles.instructions}>{recipe.strInstructions}</Text>
+        <Text style={[styles.sectionTitle, { color: isDark ? '#fff' : '#444', borderBottomColor: isDark ? '#444' : '#eee' }]}>
+          Instrucciones:
+        </Text>
+        <Text style={[styles.instructions, { color: isDark ? '#ddd' : '#333' }]}>
+          {recipe.strInstructions}
+        </Text>
 
         {recipe.strYoutube && (
           <TouchableOpacity
-            style={styles.youtubeButton}
+            style={[
+              styles.youtubeButton,
+              { backgroundColor: isDark ? '#cc0000' : '#FF0000' },
+            ]}
             onPress={() => Linking.openURL(recipe.strYoutube!)}
           >
             <Ionicons name="logo-youtube" size={24} color="white" style={styles.youtubeIcon} />
             <Text style={styles.youtubeButtonText}>Ver en YouTube</Text>
           </TouchableOpacity>
         )}
-
       </ScrollView>
     </>
   );
@@ -128,7 +166,6 @@ const RecipeDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   contentContainer: {
     padding: 20,
@@ -173,7 +210,6 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#555',
     marginBottom: 8,
     textAlign: 'center',
   },
@@ -182,39 +218,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 10,
-    color: '#444',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
     paddingBottom: 5,
   },
   instructions: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#333',
     textAlign: 'justify',
   },
   ingredient: {
     fontSize: 16,
     lineHeight: 22,
-    color: '#333',
     marginLeft: 10,
   },
   errorText: {
-    color: 'red',
     fontSize: 16,
     textAlign: 'center',
   },
-    youtubeButton: {
+  youtubeButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FF0000', 
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
     marginTop: 20,
-    elevation: 2, 
-    shadowColor: '#000', 
+    elevation: 2,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
