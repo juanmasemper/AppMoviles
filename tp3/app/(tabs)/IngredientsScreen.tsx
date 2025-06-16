@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
-import { useIngredients } from '../context/IngredientsContext';
-import { useThemeContext } from '../../hooks/ThemeContext';
+import { useIngredients } from '../context/IngredientsContext'; // Asegúrate de que la ruta sea correcta
+import { useThemeContext } from '../../hooks/ThemeContext'; // Asegúrate de que la ruta sea correcta
 import { Ionicons } from '@expo/vector-icons';
 
-const IngredientsScreen = () => {
+export default function IngredientsScreen() {
   const { ingredients, addIngredient, removeIngredient } = useIngredients();
   const [inputValue, setInputValue] = useState('');
   const { theme } = useThemeContext();
@@ -31,7 +31,8 @@ const IngredientsScreen = () => {
           <TextInput
             style={[styles.input, { 
               backgroundColor: isDark ? '#2c2c2c' : '#f0f0f0', 
-              color: isDark ? '#fff' : '#000' 
+              color: isDark ? '#fff' : '#000',
+              borderColor: isDark ? '#444' : '#ccc'
             }]}
             placeholder="Ej: Pollo, arroz, tomate..."
             placeholderTextColor={isDark ? '#aaa' : '#666'}
@@ -47,14 +48,16 @@ const IngredientsScreen = () => {
           renderItem={({ item }) => (
             <View style={[styles.ingredientItem, { backgroundColor: isDark ? '#1e1e1e' : '#fff' }]}>
               <Text style={[styles.ingredientText, { color: isDark ? '#ddd' : '#333' }]}>{item.name}</Text>
-              <TouchableOpacity onPress={() => removeIngredient(item.id)}>
+              {/* --- CAMBIO REALIZADO AQUÍ --- */}
+              {/* Ahora pasamos el objeto 'item' completo a la función para poder eliminarlo de Firestore */}
+              <TouchableOpacity onPress={() => removeIngredient(item)}>
                 <Ionicons name="trash-bin-outline" size={24} color="#ff6b6b" />
               </TouchableOpacity>
             </View>
           )}
           ListEmptyComponent={
             <Text style={[styles.emptyText, { color: isDark ? '#aaa' : '#666' }]}>
-              Tu despensa está vacía.
+              Tu despensa está vacía. Inicia sesión y añade ingredientes.
             </Text>
           }
         />
@@ -69,7 +72,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
   subtitle: { fontSize: 16, textAlign: 'center', marginBottom: 20 },
   inputContainer: { flexDirection: 'row', marginBottom: 20, alignItems: 'center' },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 8, marginRight: 10 },
+  input: { flex: 1, borderWidth: 1, padding: 10, borderRadius: 8, marginRight: 10 },
   ingredientItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -77,7 +80,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
-    elevation: 1,
+    backgroundColor: '#fff',
+    elevation: 2,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -86,5 +90,3 @@ const styles = StyleSheet.create({
   ingredientText: { fontSize: 18 },
   emptyText: { textAlign: 'center', marginTop: 50, fontSize: 16, fontStyle: 'italic' },
 });
-
-export default IngredientsScreen;
