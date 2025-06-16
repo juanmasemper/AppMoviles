@@ -1,8 +1,7 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeContext } from '../../hooks/ThemeContext';
+import { useThemeContext } from '../../hooks/ThemeContext'; // Asegúrate de que la ruta sea correcta
 
 export default function TabLayout() {
   const { theme } = useThemeContext();
@@ -11,33 +10,18 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: isDark ? '#ff6b6b' : '#007bff',
-        tabBarInactiveTintColor: isDark ? '#888' : '#666',
         headerShown: false,
-        tabBarStyle: Platform.select({
-          ios: {
-            backgroundColor: isDark ? '#1e1e1e' : '#fff',
-            borderTopColor: isDark ? '#333' : '#e0e0e0',
-            borderTopWidth: 1,
-            elevation: 8,
-          },
-          default: {
-            backgroundColor: isDark ? '#1e1e1e' : '#fff',
-            borderTopColor: isDark ? '#333' : '#e0e0e0',
-            borderTopWidth: 1,
-          },
-        }),
+        tabBarActiveTintColor: isDark ? '#bb86fc' : '#6200ee',
+        tabBarStyle: {
+          backgroundColor: isDark ? '#121212' : '#fff',
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Buscar',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? 'search' : 'search-outline'} 
-              size={24} 
-              color={color} 
-            />
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
           ),
         }}
       />
@@ -46,11 +30,17 @@ export default function TabLayout() {
         options={{
           title: 'Favoritos',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons 
-              name={focused ? 'heart' : 'heart-outline'} 
-              size={24} 
-              color={color} 
-            />
+            <Ionicons name={focused ? 'star' : 'star-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="IngredientsScreen"
+        options={{
+          title: 'Despensa',
+
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'basket' : 'basket-outline'} size={24} color={color} />
           ),
         }}
       />

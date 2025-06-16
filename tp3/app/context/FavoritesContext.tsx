@@ -1,60 +1,64 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Meal } from '../services/RecipeApi';
+import { useAuth } from './AuthContext'; // Importar el hook de autenticación
+import { db } from '../../config/firebase';
+import { doc, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from "firebase/firestore";
 
 interface FavoritesContextType {
   favorites: Meal[];
   addToFavorites: (recipe: Meal) => Promise<void>;
   removeFromFavorites: (recipeId: string) => Promise<void>;
   isFavorite: (recipeId: string) => boolean;
-  loadFavorites: () => Promise<void>;
 }
 
 const FavoritesContext = createContext<FavoritesContextType | undefined>(undefined);
 
-const FAVORITES_STORAGE_KEY = '@favorites';
-
 export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [favorites, setFavorites] = useState<Meal[]>([]);
+  const { user } = useAuth(); // Obtener el usuario actual
 
-  const loadFavorites = async () => {
-    try {
-      const storedFavorites = await AsyncStorage.getItem(FAVORITES_STORAGE_KEY);
-      if (storedFavorites) {
-        setFavorites(JSON.parse(storedFavorites));
-      }
-    } catch (error) {
-      console.error('Error loading favorites:', error);
-    }
-  };
+  useEffect(() => {
+    if (user) {
+      const userFavoritesRef = doc(db, 'favorites', user.uid);
+      
+      const unsubscribe = onSnapshot(userFavoritesRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const favoritesData = docSnap.data()?.recipes || [];
+          setFavorites(favoritesData);
+        } else {
+          setDoc(userFavoritesRef, { recipes: [] });
+          setFavorites([]);
+        }
+      });
 
-  const saveFavorites = async (newFavorites: Meal[]) => {
-    try {
-      await AsyncStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(newFavorites));
-    } catch (error) {
-      console.error('Error saving favorites:', error);
+      return () => unsubscribe();
+    } else {
+      setFavorites([]);
     }
-  };
+  }, [user]);
 
   const addToFavorites = async (recipe: Meal) => {
-    const newFavorites = [...favorites, recipe];
-    setFavorites(newFavorites);
-    await saveFavorites(newFavorites);
+    if (!user) return; 
+    const userFavoritesRef = doc(db, 'favorites', user.uid);
+    await updateDoc(userFavoritesRef, {
+        recipes: arrayUnion(recipe)
+    });
   };
 
   const removeFromFavorites = async (recipeId: string) => {
-    const newFavorites = favorites.filter(fav => fav.idMeal !== recipeId);
-    setFavorites(newFavorites);
-    await saveFavorites(newFavorites);
+    if (!user) return; 
+    const recipeToRemove = favorites.find(fav => fav.idMeal === recipeId);
+    if (recipeToRemove) {
+      const userFavoritesRef = doc(db, 'favorites', user.uid);
+      await updateDoc(userFavoritesRef, {
+          recipes: arrayRemove(recipeToRemove)
+      });
+    }
   };
 
   const isFavorite = (recipeId: string) => {
     return favorites.some(fav => fav.idMeal === recipeId);
   };
-
-  useEffect(() => {
-    loadFavorites();
-  }, []);
 
   return (
     <FavoritesContext.Provider
@@ -63,7 +67,6 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({ children 
         addToFavorites,
         removeFromFavorites,
         isFavorite,
-        loadFavorites,
       }}
     >
       {children}
