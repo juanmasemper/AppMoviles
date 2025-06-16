@@ -30,7 +30,7 @@ export default function TabLayout() {
         options={{
           title: 'Favoritos',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'star' : 'star-outline'} size={24} color={color} />
+            <Ionicons  name={focused ? 'heart' : 'heart-outline'}  size={24} color={color} />
           ),
         }}
       />
