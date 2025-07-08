@@ -7,6 +7,8 @@ import {
   SafeAreaView,
   Alert,
   Dimensions,
+  BackHandler,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
@@ -66,6 +68,18 @@ const App: React.FC = () => {
   useEffect(() => {
     loadStats();
   }, []);
+
+  useEffect(() => {
+    const backAction = () => {
+      if (currentScreen === 'game' || currentScreen === 'instructions' || currentScreen === 'stats') {
+        setCurrentScreen('menu');
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [currentScreen]);
 
   const loadStats = async () => {
     try {
@@ -181,7 +195,7 @@ const App: React.FC = () => {
     const rows = [
       ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
       ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
-      ['ENVIAR', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BORRAR']
+      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BORRAR']
     ];
 
     return (
@@ -212,45 +226,60 @@ const App: React.FC = () => {
   };
 
   const renderGameScreen = () => (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding(), flex: 1 }]}> 
       <StatusBar style="dark" />
-      <Text style={styles.title}>PalabrAr</Text>
-      
-      <View style={styles.gameBoard}>
-        {gameBoard.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.row}>
-            {row.map((letter, colIndex) => (
-              <View
-                key={colIndex}
-                style={[
-                  styles.cell,
-                  rowIndex < currentRow ? {
-                    backgroundColor: getLetterColor(letter, colIndex, row.join(''))
-                  } : null,
-                  rowIndex === currentRow && colIndex === currentCol ? styles.activeCell : null
-                ]}
-              >
-                <Text style={[
-                  styles.cellText,
-                  rowIndex < currentRow ? styles.completedCellText : null
-                ]}>
-                  {letter}
-                </Text>
+      <View style={styles.headerRow}>
+        <TouchableOpacity
+          style={styles.backButtonSmall}
+          onPress={() => setCurrentScreen('menu')}
+        >
+          <Text style={styles.backButtonTextSmall}>Volver</Text>
+        </TouchableOpacity>
+        <Text style={styles.titleCentered}>PalabrAr</Text>
+        <View style={{ width: 80 }} />
+      </View>
+      <View style={{ flex: 1, justifyContent: 'space-between', width: '100%' }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <View style={styles.gameBoard}>
+            {gameBoard.map((row, rowIndex) => (
+              <View key={rowIndex} style={styles.row}>
+                {row.map((letter, colIndex) => (
+                  <View
+                    key={colIndex}
+                    style={[
+                      styles.cell,
+                      rowIndex < currentRow ? {
+                        backgroundColor: getLetterColor(letter, colIndex, row.join(''))
+                      } : null,
+                      rowIndex === currentRow && colIndex === currentCol ? styles.activeCell : null
+                    ]}
+                  >
+                    <Text style={[
+                      styles.cellText,
+                      rowIndex < currentRow ? styles.completedCellText : null
+                    ]}>
+                      {letter}
+                    </Text>
+                  </View>
+                ))}
               </View>
             ))}
           </View>
-        ))}
+        </View>
+        <View style={{ width: '100%' }}>
+          <View style={styles.keyboardBottom}>{renderKeyboard()}</View>
+          <TouchableOpacity style={styles.enviarButton} onPress={submitGuess}>
+            <Text style={styles.enviarButtonText}>Enviar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      {renderKeyboard()}
     </SafeAreaView>
   );
 
   const renderMenuScreen = () => (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}> 
       <StatusBar style="dark" />
       <Text style={styles.title}>PalabrAr</Text>
-      
       <View style={styles.menuButtons}>
         <TouchableOpacity 
           style={styles.menuButton}
@@ -280,7 +309,7 @@ const App: React.FC = () => {
   );
 
   const renderInstructionsScreen = () => (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}> 
       <StatusBar style="dark" />
       <Text style={styles.title}>PalabrAr</Text>
       <Text style={styles.subtitle}>Cómo jugar</Text>
@@ -356,7 +385,7 @@ const App: React.FC = () => {
   );
 
   const renderStatsScreen = () => (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}> 
       <StatusBar style="dark" />
       <Text style={styles.title}>PalabrAr</Text>
       <Text style={styles.subtitle}>Estadísticas</Text>
@@ -423,6 +452,14 @@ const App: React.FC = () => {
     }
   };
 
+  // Ajuste de paddingTop para evitar la isla flotante/notch
+  const getSafePadding = () => {
+    if (Platform.OS === 'ios') {
+      return 60;
+    }
+    return 40;
+  };
+
   return renderCurrentScreen();
 };
 
@@ -432,6 +469,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
     paddingTop: 20,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    paddingHorizontal: 10,
+  },
+  titleCentered: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    textAlign: 'center',
+    flex: 1,
+  },
+  backButtonSmall: {
+    backgroundColor: '#4A90E2',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  backButtonTextSmall: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 32,
@@ -500,26 +563,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 5,
   },
+  keyboardBottom: {
+    width: '100%',
+    paddingHorizontal: 0,
+    marginBottom: 10,
+    marginTop: 10,
+    flex: 0,
+  },
   key: {
     backgroundColor: '#D3D6DA',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: 14, // reducido para más espacio vertical
+    paddingHorizontal: 7, // reducido para más espacio horizontal
     marginHorizontal: 2,
     borderRadius: 4,
-    minWidth: 30,
+    minWidth: 34,
     alignItems: 'center',
   },
   wideKey: {
-    paddingHorizontal: 12,
-    minWidth: 60,
+    paddingHorizontal: 12, // reducido para más espacio
+    minWidth: 60, // reducido para que no ocupe tanto ancho
   },
   keyText: {
-    fontSize: 12,
+    fontSize: 24, // aumentado
     fontWeight: 'bold',
     color: '#333333',
   },
   wideKeyText: {
-    fontSize: 10,
+    fontSize: 20, // aumentado
   },
   instructionsContainer: {
     flex: 1,
@@ -620,6 +690,26 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 14,
+  },
+  enviarButton: {
+    backgroundColor: '#2979FF',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 30,
+    alignSelf: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    marginTop: 10,
+  },
+  enviarButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 
