@@ -15,21 +15,31 @@ import { StatusBar } from 'expo-status-bar';
 
 const { width } = Dimensions.get('window');
 
-// Diccionario expandido de palabras en español de 5 letras
+
 const PALABRAS_VALIDAS = [
   'GATOS', 'TANGO', 'CABLE', 'FRUTO', 'MUNDO', 'PLAYA', 'VERDE', 'NEGRO',
-  'BLANCO', 'ROJO', 'AZUL', 'ROSA', 'CASA', 'MESA', 'SILLA', 'PUERTA',
-  'AGUA', 'FUEGO', 'TIERRA', 'AIRE', 'CIELO', 'NUBE', 'LUNA', 'FLOR',
-  'ARBOL', 'HOJA', 'RAIZ', 'TALLO', 'FRUTA', 'CAMPO', 'MONTE', 'LAGO',
-  'PLAYA', 'ARENA', 'ROCA', 'PIEDRA', 'MADERA', 'TELA', 'LANA', 'SEDA',
-  'PAPEL', 'LIBRO', 'LAPIZ', 'MESA', 'SILLA', 'CAMA', 'SOFA', 'COCINA',
-  'BAÑO', 'SALON', 'CUARTO', 'PATIO', 'JARDIN', 'CALLE', 'PLAZA', 'PARQUE',
-  'BANCO', 'TIENDA', 'ESCUELA', 'IGLESIA', 'MUSEO', 'CINE', 'TEATRO',
-  'HOTEL', 'PLATO', 'VASO', 'CUCHARA', 'TENEDOR', 'CUCHILLO', 'BOTELLA',
-  'JARRA', 'OLLA', 'SARTEN', 'HORNO', 'NEVERA', 'LAVADORA', 'SECADORA'
+  'ROJO', 'AZUL', 'ROSA', 'CASA', 'MESA', 'SILLA', 'AGUA', 'LAPIZ',
+  'ARBOL', 'HOJA', 'RAIZ', 'LUNA', 'FLOR', 'CAMPO', 'MONTE', 'LAGO',
+  'ARENA', 'ROCA', 'TELA', 'LANA', 'SEDA', 'PAPEL', 'LIBRO', 'CIELO',
+  'NUBE', 'PLAZA', 'BANCO', 'HOTEL', 'PLATO', 'VASO', 'JARRA', 'OLLA',
+  'HORNO', 'SALON', 'CUARTO', 'CALLE', 'PIEDRA', 'MADERA', 'SOFÁ',
+  'PERRO', 'GOLPE', 'FELIZ', 'NIEVE', 'BESOS', 'BOLSA', 'CANTO', 'CIEGA',
+  'CLAVE', 'CREMA', 'CRUCE', 'DADOS', 'DANZA', 'DOLOR', 'FANGO', 'FAROL',
+  'FIEST', 'FIRMA', 'FONDO', 'FRESA', 'FUEGO', 'GAFAS', 'GRANO', 'GRITO',
+  'HABLA', 'HIELO', 'HUEVO', 'JUEGO', 'JUNTA', 'LIMON', 'LLAVE', 'LUCHA',
+  'LUZES', 'MANOS', 'MARCO', 'MARCH', 'MORAL', 'MOROS', 'MOTOR', 'NADAR',
+  'NARIZ', 'NIEVE', 'NOBLE', 'NORTE', 'NOTAS', 'NUBES', 'OCASO', 'OJOS',
+  'OLVID', 'ONDAA', 'OROZO', 'PAGAR', 'PAISA', 'PALMA', 'PANEL', 'PAPAS',
+  'PARTE', 'PATIO', 'PAUSA', 'PEINE', 'PELOS', 'PERLA', 'PIANO', 'PIEZA',
+  'PLAZO', 'PLUMA', 'POEMA', 'POLVO', 'PRESA', 'PRISA', 'PUNTO', 'QUESO',
+  'RAMAS', 'RATON', 'REINA', 'RELOJ', 'RIEGO', 'RISAS', 'ROBLE', 'ROCAS',
+  'RUEDA', 'SALSA', 'SELVA', 'SERIE', 'SILLA', 'SUELO', 'TAREA', 'TARRO',
+  'TECHO', 'TENIS', 'TESOR', 'TIARA', 'TIEMO', 'TIENE', 'TIERRA', 'TINTO',
+  'TORRE', 'TRUCO', 'UNION', 'URGEN', 'VALOR', 'VELAS', 'VIAJE', 'VIDAS',
+  'VIENTO', 'VISTA', 'VIVIR', 'VOCAL', 'YERBA', 'ZORRO', 'ZURDO'
 ];
 
-// Función para obtener palabra aleatoria del día
+
 const obtenerPalabraDelDia = (): string => {
   const hoy = new Date();
   const seed = hoy.getFullYear() * 10000 + (hoy.getMonth() + 1) * 100 + hoy.getDate();
@@ -110,11 +120,11 @@ const App: React.FC = () => {
 
   const getLetterColor = (letter: string, position: number, word: string): string => {
     if (PALABRA_DEL_DIA[position] === letter) {
-      return '#6AAA64'; // Verde - posición correcta
+      return '#6AAA64'; 
     } else if (PALABRA_DEL_DIA.includes(letter)) {
-      return '#C9B458'; // Amarillo - letra en palabra pero posición incorrecta
+      return '#C9B458'; 
     } else {
-      return '#787C7E'; // Gris - letra no está en la palabra
+      return '#787C7E'; 
     }
   };
 
@@ -452,7 +462,7 @@ const App: React.FC = () => {
     }
   };
 
-  // Ajuste de paddingTop para evitar la isla flotante/notch
+  
   const getSafePadding = () => {
     if (Platform.OS === 'ios') {
       return 60;
@@ -572,24 +582,24 @@ const styles = StyleSheet.create({
   },
   key: {
     backgroundColor: '#D3D6DA',
-    paddingVertical: 14, // reducido para más espacio vertical
-    paddingHorizontal: 7, // reducido para más espacio horizontal
+    paddingVertical: 14, 
+    paddingHorizontal: 7, 
     marginHorizontal: 2,
     borderRadius: 4,
     minWidth: 34,
     alignItems: 'center',
   },
   wideKey: {
-    paddingHorizontal: 12, // reducido para más espacio
-    minWidth: 60, // reducido para que no ocupe tanto ancho
+    paddingHorizontal: 12, 
+    minWidth: 60, 
   },
   keyText: {
-    fontSize: 24, // aumentado
+    fontSize: 24, 
     fontWeight: 'bold',
     color: '#333333',
   },
   wideKeyText: {
-    fontSize: 20, // aumentado
+    fontSize: 20, 
   },
   instructionsContainer: {
     flex: 1,
