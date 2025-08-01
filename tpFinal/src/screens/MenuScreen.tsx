@@ -3,7 +3,7 @@ import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Platform } from
 import { StatusBar } from 'expo-status-bar';
 
 interface MenuScreenProps {
-  onNavigateToGame: () => void;
+  onNavigateToGame: (mode: 'daily' | 'free') => void;
   onNavigateToInstructions: () => void;
   onNavigateToStats: () => void;
 }
@@ -21,9 +21,16 @@ const MenuScreen: React.FC<MenuScreenProps> = ({
       <View style={styles.menuButtons}>
         <TouchableOpacity 
           style={styles.menuButton}
-          onPress={onNavigateToGame}
+          onPress={() => onNavigateToGame('daily')}
         >
-          <Text style={styles.menuButtonText}>Jugar</Text>
+          <Text style={styles.menuButtonText}>Palabra del Día</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.menuButton, styles.freeButton]}
+          onPress={() => onNavigateToGame('free')}
+        >
+          <Text style={styles.menuButtonText}>Modo Libre</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -75,6 +82,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  freeButton: {
+    backgroundColor: '#4A90E2',
   },
   menuButtonText: {
     color: '#FFFFFF',

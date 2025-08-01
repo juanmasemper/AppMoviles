@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PALABRA_DEL_DIA, PALABRAS_VALIDAS } from '../constants/gameConstants';
-import { GameStats } from '../types';
+import { PALABRA_DEL_DIA, PALABRAS_VALIDAS, obtenerPalabraAleatoria } from '../constants/gameConstants';
+import { GameStats, GameMode } from '../types';
 
 // Valores iniciales para un juego nuevo
 const initialBoard = () => Array(6).fill(null).map(() => Array(5).fill(''));
@@ -18,16 +18,26 @@ const initialKeyboardColors = {
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
 
-export const useGame = () => {
+export const useGame = (mode: GameMode = 'daily') => {
   const [gameBoard, setGameBoard] = useState(initialBoard());
   const [currentRow, setCurrentRow] = useState(0);
   const [currentCol, setCurrentCol] = useState(0);
   const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [coloresGrilla, setColoresGrilla] = useState(initialGridColors());
   const [coloresTeclado, setColoresTeclado] = useState(initialKeyboardColors);
+  const [currentWord, setCurrentWord] = useState<string>('');
   const [stats, setStats] = useState<GameStats>({
     gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0, 0, 0, 0, 0, 0]
   });
+
+  // Función para inicializar la palabra según el modo
+  const initializeWord = useCallback(() => {
+    if (mode === 'daily') {
+      setCurrentWord(PALABRA_DEL_DIA);
+    } else {
+      setCurrentWord(obtenerPalabraAleatoria());
+    }
+  }, [mode]);
 
   // Función para guardar el estado completo del juego
   const saveGameState = useCallback(async () => {
@@ -37,10 +47,13 @@ export const useGame = () => {
       keyboardColors: coloresTeclado,
       row: currentRow,
       status: gameStatus,
+      word: currentWord,
+      mode: mode,
       date: getTodayString(),
     };
-    await AsyncStorage.setItem('palabrar_gameState', JSON.stringify(gameState));
-  }, [gameBoard, coloresGrilla, coloresTeclado, currentRow, gameStatus]);
+    const storageKey = mode === 'daily' ? 'palabrar_gameState' : 'palabrar_gameState_free';
+    await AsyncStorage.setItem(storageKey, JSON.stringify(gameState));
+  }, [gameBoard, coloresGrilla, coloresTeclado, currentRow, gameStatus, currentWord, mode]);
 
   // Guardar el estado cada vez que algo importante cambia
   useEffect(() => {
@@ -57,25 +70,37 @@ export const useGame = () => {
       const savedStats = await AsyncStorage.getItem('palabrar_stats');
       if (savedStats) setStats(JSON.parse(savedStats));
 
-      // Cargar estado del juego
-      const savedGame = await AsyncStorage.getItem('palabrar_gameState');
+      // Cargar estado del juego según el modo
+      const storageKey = mode === 'daily' ? 'palabrar_gameState' : 'palabrar_gameState_free';
+      const savedGame = await AsyncStorage.getItem(storageKey);
+      
       if (savedGame) {
         const gameState = JSON.parse(savedGame);
-        // Si el juego guardado es de hoy, lo cargamos
-        if (gameState.date === getTodayString()) {
+        
+        // Para modo diario: solo cargar si es del mismo día
+        // Para modo libre: siempre cargar el último juego (si no está terminado)
+        const shouldLoadState = mode === 'free' ? 
+          gameState.status === 'playing' : 
+          gameState.date === getTodayString();
+          
+        if (shouldLoadState) {
           setGameBoard(gameState.board);
           setColoresGrilla(gameState.colors);
           setColoresTeclado(gameState.keyboardColors);
           setCurrentRow(gameState.row);
           setGameStatus(gameState.status);
+          setCurrentWord(gameState.word);
         } else {
-          // Si es de otro día, se resetea (lo que resetGame hace)
-          resetGame();
+          // Si no se puede cargar el estado, inicializar nuevo juego
+          initializeWord();
         }
+      } else {
+        // No hay estado guardado, inicializar palabra
+        initializeWord();
       }
     };
     loadState();
-  }, []); // El array vacío asegura que esto solo se ejecute una vez al inicio
+  }, [mode, initializeWord]); // Dependemos del modo e initializeWord
 
   const resetGame = () => {
     setGameBoard(initialBoard());
@@ -84,8 +109,17 @@ export const useGame = () => {
     setCurrentRow(0);
     setCurrentCol(0);
     setGameStatus('playing');
-    // Limpia el estado del juego guardado para el nuevo día
-    AsyncStorage.removeItem('palabrar_gameState');
+    
+    // Generar nueva palabra según el modo
+    if (mode === 'daily') {
+      setCurrentWord(PALABRA_DEL_DIA);
+    } else {
+      setCurrentWord(obtenerPalabraAleatoria());
+    }
+    
+    // Limpiar el estado guardado
+    const storageKey = mode === 'daily' ? 'palabrar_gameState' : 'palabrar_gameState_free';
+    AsyncStorage.removeItem(storageKey);
   };
 
   const updateStats = (didWin: boolean) => {
@@ -107,7 +141,7 @@ export const useGame = () => {
   };
 
   const evaluarIntento = (intento: string): string[] => {
-    const palabraSecretaArray = PALABRA_DEL_DIA.split('');
+    const palabraSecretaArray = currentWord.split('');
     const intentoArray = intento.split('');
     const coloresResult = Array(5).fill('#787C7E');
     for (let i = 0; i < 5; i++) {
@@ -152,14 +186,14 @@ export const useGame = () => {
     });
     setColoresTeclado(nuevosColoresTeclado);
 
-    if (currentGuess === PALABRA_DEL_DIA) {
+    if (currentGuess === currentWord) {
       setGameStatus('won');
       updateStats(true);
-      Alert.alert('¡Felicitaciones!', `¡Adivinaste la palabra: ${PALABRA_DEL_DIA}!`);
+      Alert.alert('¡Felicitaciones!', `¡Adivinaste la palabra: ${currentWord}!`);
     } else if (currentRow === 5) {
       setGameStatus('lost');
       updateStats(false);
-      Alert.alert('Juego terminado', `La palabra era: ${PALABRA_DEL_DIA}`);
+      Alert.alert('Juego terminado', `La palabra era: ${currentWord}`);
     } else {
       setCurrentRow(currentRow + 1);
       setCurrentCol(0);
@@ -185,5 +219,5 @@ export const useGame = () => {
     }
   };
 
-  return { gameBoard, coloresGrilla, coloresTeclado, gameStatus, currentRow, currentCol, stats, handleKeyPress, resetGame };
+  return { gameBoard, coloresGrilla, coloresTeclado, gameStatus, currentRow, currentCol, stats, currentWord, handleKeyPress, resetGame };
 };

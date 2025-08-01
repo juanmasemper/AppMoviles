@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import Keyboard from '../components/Keyboard';
 import { GameStats } from '../types';
 
-// La interfaz de props ahora es mucho más grande
 interface GameScreenProps {
   onGoBack: () => void;
   gameBoard: string[][];
@@ -14,7 +13,9 @@ interface GameScreenProps {
   currentCol: number;
   handleKeyPress: (key: string) => void;
   gameStatus: 'playing' | 'won' | 'lost';
-  stats: GameStats; // Aunque no la usemos aquí, la recibimos
+  stats: GameStats; 
+  gameMode?: 'daily' | 'free';
+  resetGame?: () => void;
 }
 
 const GameBoard: React.FC<{ board: string[][]; colors: string[][]; currentRow: number; currentCol: number;}> = 
@@ -42,8 +43,7 @@ const GameBoard: React.FC<{ board: string[][]; colors: string[][]; currentRow: n
 );
 
 const GameScreen: React.FC<GameScreenProps> = (props) => {
-  // Ya no usamos el hook aquí. Todo viene de las props.
-  const { onGoBack, gameBoard, coloresGrilla, coloresTeclado, currentRow, currentCol, handleKeyPress } = props;
+  const { onGoBack, gameBoard, coloresGrilla, coloresTeclado, currentRow, currentCol, handleKeyPress, gameMode, gameStatus } = props;
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 40 : 40 }]}>
@@ -52,7 +52,14 @@ const GameScreen: React.FC<GameScreenProps> = (props) => {
         <TouchableOpacity style={styles.backButtonSmall} onPress={onGoBack}>
           <Text style={styles.backButtonTextSmall}>Volver</Text>
         </TouchableOpacity>
-        <Text style={styles.titleCentered}>PalabrAr</Text>
+        <View style={styles.titleContainer}>
+          <Text style={styles.titleCentered}>PalabrAr</Text>
+          {gameMode && (
+            <Text style={styles.modeText}>
+              {gameMode === 'daily' ? 'Palabra del Día' : 'Modo Libre'}
+            </Text>
+          )}
+        </View>
         <View style={{ width: 80 }} />
       </View>
 
@@ -63,6 +70,19 @@ const GameScreen: React.FC<GameScreenProps> = (props) => {
           currentRow={currentRow}
           currentCol={currentCol}
         />
+        
+        {gameMode === 'free' && gameStatus !== 'playing' && (
+          <TouchableOpacity 
+            style={styles.newGameButton} 
+            onPress={() => {
+              if (props.resetGame) {
+                props.resetGame();
+              }
+            }}
+          >
+            <Text style={styles.newGameButtonText}>Nuevo Juego</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <Keyboard onKeyPress={handleKeyPress} coloresTeclado={coloresTeclado} />
@@ -70,11 +90,12 @@ const GameScreen: React.FC<GameScreenProps> = (props) => {
   );
 };
 
-// Los estilos son los mismos, no es necesario cambiarlos.
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF', alignItems: 'center', },
   headerRow: { flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'space-between', paddingHorizontal: 10, borderBottomWidth: 1, borderBottomColor: '#D3D6DA', paddingBottom: 10, },
+  titleContainer: { alignItems: 'center' },
   titleCentered: { fontSize: 32, fontWeight: 'bold', color: '#4A90E2', textAlign: 'center', },
+  modeText: { fontSize: 12, color: '#666666', marginTop: 2 },
   backButtonSmall: { backgroundColor: '#4A90E2', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 10, },
   backButtonTextSmall: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold', },
   content: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%', },
@@ -84,6 +105,8 @@ const styles = StyleSheet.create({
   activeCell: { borderColor: '#4A90E2', transform: [{ scale: 1.05 }], },
   cellText: { fontSize: 28, fontWeight: 'bold', color: '#333333', },
   completedCellText: { color: '#FFFFFF', },
+  newGameButton: { backgroundColor: '#28A745', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 10, marginTop: 20, },
+  newGameButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold', },
 });
 
 export default GameScreen;

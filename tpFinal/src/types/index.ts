@@ -7,4 +7,6 @@ export interface GameStats {
   guessDistribution: number[];
 }
 
+export type GameMode = 'daily' | 'free';
+
 export type Screen = 'menu' | 'game' | 'instructions' | 'stats';

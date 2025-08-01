@@ -10,4 +10,9 @@ export const obtenerPalabraDelDia = (): string => {
   return PALABRAS_VALIDAS[indice].toUpperCase();
 };
 
+export const obtenerPalabraAleatoria = (): string => {
+  const indiceAleatorio = Math.floor(Math.random() * PALABRAS_VALIDAS.length);
+  return PALABRAS_VALIDAS[indiceAleatorio].toUpperCase();
+};
+
 export const PALABRA_DEL_DIA = obtenerPalabraDelDia();

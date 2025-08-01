@@ -5,13 +5,13 @@ import GameScreen from './src/screens/GameScreen';
 import InstructionsScreen from './src/screens/InstructionsScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import { useGame } from './src/hooks/useGame';
-import { Screen } from './src/types';
+import { Screen, GameMode } from './src/types';
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
+  const [gameMode, setGameMode] = useState<GameMode>('daily');
 
-  // Llamamos a useGame aquí, UNA SOLA VEZ.
-  const gameLogic = useGame();
+  const gameLogic = useGame(gameMode);
 
   useEffect(() => {
     const backAction = () => {
@@ -27,9 +27,9 @@ const App: React.FC = () => {
 
   const navigateTo = (screen: Screen) => setCurrentScreen(screen);
   
-  const handlePlay = () => {
-    // Si el juego ya terminó hoy, no lo reseteamos.
-    if(gameLogic.gameStatus === 'playing') {
+  const handlePlay = (mode: GameMode) => {
+    setGameMode(mode);
+    if (gameLogic.gameStatus !== 'playing') {
       gameLogic.resetGame();
     }
     navigateTo('game');
@@ -38,8 +38,7 @@ const App: React.FC = () => {
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case 'game':
-        // Pasamos toda la lógica y el estado a GameScreen como props.
-        return <GameScreen onGoBack={() => navigateTo('menu')} {...gameLogic} />;
+        return <GameScreen onGoBack={() => navigateTo('menu')} gameMode={gameMode} {...gameLogic} />;
       
       case 'instructions':
         return <InstructionsScreen onGoBack={() => navigateTo('menu')} />;
