@@ -1,18 +1,16 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-// Definimos qué "props" (propiedades) necesitará este componente
 interface KeyboardProps {
-  onKeyPress: (key: string) => void; // Una función para manejar la pulsación
-  coloresTeclado: { [key: string]: string }; // Un objeto con los colores de cada tecla
+  onKeyPress: (key: string) => void; 
+  coloresTeclado: { [key: string]: string }; 
 }
 
 const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, coloresTeclado }) => {
-  // Las filas del teclado, igual que las tenías antes
   const rows = [
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
     ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
-    ['ENVIAR', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'],
+    ['Enviar', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'],
   ];
 
   return (
@@ -20,8 +18,7 @@ const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, coloresTeclado }) => {
       {rows.map((row, rowIndex) => (
         <View key={rowIndex} style={styles.keyboardRow}>
           {row.map((key) => {
-            // Lógica para determinar el color de la tecla y del texto
-            const isSpecialKey = key === 'ENVIAR' || key === '⌫';
+            const isSpecialKey = key === 'Enviar' || key === '⌫';
             const keyColor = !isSpecialKey ? coloresTeclado[key] : '#D3D6DA';
             const textColor = !isSpecialKey && keyColor !== '#D3D6DA' ? '#FFFFFF' : '#000000';
 
@@ -33,10 +30,13 @@ const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, coloresTeclado }) => {
                   { backgroundColor: keyColor },
                   isSpecialKey ? styles.specialKey : null,
                 ]}
-                // Al presionar, llamamos a la función onKeyPress que recibimos por props
-                onPress={() => onKeyPress(key === '⌫' ? 'BORRAR' : key)}
+                onPress={() => onKeyPress(key === '⌫' ? 'BORRAR' : key === 'Enviar' ? 'ENVIAR' : key)}
               >
-                <Text style={[styles.keyText, { color: textColor }]}>{key}</Text>
+                <Text style={[
+                  styles.keyText, 
+                  { color: textColor },
+                  isSpecialKey ? styles.specialKeyText : null
+                ]}>{key}</Text>
               </TouchableOpacity>
             );
           })}
@@ -62,20 +62,25 @@ const styles = StyleSheet.create({
   key: {
     backgroundColor: '#D3D6DA',
     padding: 10,
-    margin: 3,
+    margin: 1.5,
     borderRadius: 8,
     height: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '8.5%', 
+    width: '9%', 
   },
   specialKey: {
-    width: '15%', 
+    width: '14%', 
   }, 
   keyText: {
-    fontSize: 16,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333333',
+  },
+  specialKeyText: {
+    fontSize: 14,
+    lineHeight: 28,
+    textAlignVertical: 'center',
   },
 });
 
