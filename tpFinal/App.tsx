@@ -9,12 +9,48 @@ import {
   Dimensions,
   BackHandler,
   Platform,
+  useColorScheme, // <-- AÑADIDO
+  Pressable,      // <-- AÑADIDO
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar as ExpoStatusBar } from 'expo-status-bar'; // Renombrado para evitar conflictos
 
 const { width } = Dimensions.get('window');
 
+// --- 1. PALETAS DE COLORES CENTRALIZADAS ---
+const lightColors = {
+  background: '#FFFFFF',
+  text: '#333333',
+  primary: '#4A90E2',
+  primaryText: '#FFFFFF',
+  secondaryText: '#666666',
+  cellBorder: '#D3D6DA',
+  cellBackground: '#FFFFFF',
+  keyBackground: '#D3D6DA',
+  keyText: '#333333',
+  enviarButton: '#2979FF',
+  correct: '#6AAA64',
+  present: '#C9B458',
+  absent: '#787C7E',
+  distributionBar: '#E5E5E5',
+};
+
+const darkColors = {
+  background: '#121213',
+  text: '#FFFFFF',
+  primary: '#4A90E2',
+  primaryText: '#FFFFFF',
+  secondaryText: '#A5A5A5',
+  cellBorder: '#3A3A3C',
+  cellBackground: '#121213',
+  keyBackground: '#818384',
+  keyText: '#FFFFFF',
+  enviarButton: '#2979FF',
+  correct: '#6AAA64',
+  present: '#C9B458',
+  absent: '#3A3A3C',
+  distributionBar: '#3A3A3C',
+};
 
 const PALABRAS_VALIDAS = [
   'GATOS', 'TANGO', 'CABLE', 'FRUTO', 'MUNDO', 'PLAYA', 'VERDE', 'NEGRO',
@@ -60,6 +96,9 @@ interface GameStats {
 type Screen = 'menu' | 'game' | 'instructions' | 'stats';
 
 const App: React.FC = () => {
+  const systemTheme = useColorScheme(); // 'light' o 'dark'
+  const [theme, setTheme] = useState(systemTheme || 'light');
+
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [gameBoard, setGameBoard] = useState<string[][]>(
     Array(6).fill(null).map(() => Array(5).fill(''))
@@ -72,12 +111,42 @@ const App: React.FC = () => {
     gamesWon: 0,
     currentStreak: 0,
     maxStreak: 0,
-    guessDistribution: [0, 0, 0, 0, 0, 0]
+    guessDistribution: [0, 0, 0, 0, 0, 0],
   });
 
+  // --- 2. LÓGICA DEL TEMA (CARGAR, GUARDAR Y CAMBIAR) ---
   useEffect(() => {
+    loadTheme();
     loadStats();
   }, []);
+  
+  const loadTheme = async () => {
+    try {
+      const savedTheme = await AsyncStorage.getItem('theme');
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        setTheme(savedTheme);
+      } else {
+        setTheme(systemTheme === 'light' || systemTheme === 'dark' ? systemTheme : 'light');
+      }
+    } catch (error) {
+      console.error('Error loading theme:', error);
+      setTheme(systemTheme || 'light');
+    }
+  };
+
+  const toggleTheme = async () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    try {
+      await AsyncStorage.setItem('theme', newTheme);
+    } catch (error) {
+      console.error('Error saving theme:', error);
+    }
+  };
+
+  // Selecciona la paleta de colores activa y crea los estilos dinámicos
+  const colors = theme === 'light' ? lightColors : darkColors;
+  const styles = createStyles(colors);
 
   useEffect(() => {
     const backAction = () => {
@@ -118,13 +187,14 @@ const App: React.FC = () => {
     setGameStatus('playing');
   };
 
-  const getLetterColor = (letter: string, position: number, word: string): string => {
+  // --- 3. FUNCIÓN DE COLOR ADAPTADA ---
+  const getLetterColor = (letter: string, position: number): string => {
     if (PALABRA_DEL_DIA[position] === letter) {
-      return '#6AAA64'; 
+      return colors.correct;
     } else if (PALABRA_DEL_DIA.includes(letter)) {
-      return '#C9B458'; 
+      return colors.present;
     } else {
-      return '#787C7E'; 
+      return colors.absent;
     }
   };
 
@@ -162,9 +232,9 @@ const App: React.FC = () => {
       gamesWon: stats.gamesWon + 1,
       currentStreak: stats.currentStreak + 1,
       maxStreak: Math.max(stats.maxStreak, stats.currentStreak + 1),
-      guessDistribution: stats.guessDistribution.map((count, index) => 
+      guessDistribution: stats.guessDistribution.map((count, index) =>
         index === attempts - 1 ? count + 1 : count
-      )
+      ),
     };
     saveStats(newStats);
   };
@@ -174,7 +244,6 @@ const App: React.FC = () => {
       ...stats,
       gamesPlayed: stats.gamesPlayed + 1,
       currentStreak: 0,
-      guessDistribution: stats.guessDistribution
     };
     saveStats(newStats);
   };
@@ -205,7 +274,7 @@ const App: React.FC = () => {
     const rows = [
       ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
       ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
-      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BORRAR']
+      ['Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BORRAR'],
     ];
 
     return (
@@ -217,14 +286,11 @@ const App: React.FC = () => {
                 key={key}
                 style={[
                   styles.key,
-                  key === 'ENVIAR' || key === 'BORRAR' ? styles.wideKey : null
+                  key === 'BORRAR' ? styles.wideKey : null,
                 ]}
                 onPress={() => handleKeyPress(key)}
               >
-                <Text style={[
-                  styles.keyText,
-                  key === 'ENVIAR' || key === 'BORRAR' ? styles.wideKeyText : null
-                ]}>
+                <Text style={[styles.keyText, key === 'BORRAR' ? styles.wideKeyText : null]}>
                   {key}
                 </Text>
               </TouchableOpacity>
@@ -234,15 +300,13 @@ const App: React.FC = () => {
       </View>
     );
   };
-
+  
+  // --- 4. RENDERIZADO DE PANTALLAS CON ESTILOS Y STATUSBAR DINÁMICOS ---
   const renderGameScreen = () => (
-    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding(), flex: 1 }]}> 
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}>
+      <ExpoStatusBar style={theme === 'light' ? 'dark' : 'light'} />
       <View style={styles.headerRow}>
-        <TouchableOpacity
-          style={styles.backButtonSmall}
-          onPress={() => setCurrentScreen('menu')}
-        >
+        <TouchableOpacity style={styles.backButtonSmall} onPress={() => setCurrentScreen('menu')}>
           <Text style={styles.backButtonTextSmall}>Volver</Text>
         </TouchableOpacity>
         <Text style={styles.titleCentered}>PalabrAr</Text>
@@ -258,16 +322,11 @@ const App: React.FC = () => {
                     key={colIndex}
                     style={[
                       styles.cell,
-                      rowIndex < currentRow ? {
-                        backgroundColor: getLetterColor(letter, colIndex, row.join(''))
-                      } : null,
-                      rowIndex === currentRow && colIndex === currentCol ? styles.activeCell : null
+                      rowIndex < currentRow ? { backgroundColor: getLetterColor(letter, colIndex) } : null,
+                      rowIndex === currentRow && currentCol === colIndex ? styles.activeCell : null,
                     ]}
                   >
-                    <Text style={[
-                      styles.cellText,
-                      rowIndex < currentRow ? styles.completedCellText : null
-                    ]}>
+                    <Text style={[styles.cellText, rowIndex < currentRow ? styles.completedCellText : null]}>
                       {letter}
                     </Text>
                   </View>
@@ -287,11 +346,17 @@ const App: React.FC = () => {
   );
 
   const renderMenuScreen = () => (
-    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}> 
-      <StatusBar style="dark" />
-      <Text style={styles.title}>PalabrAr</Text>
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}>
+      <ExpoStatusBar style={theme === 'light' ? 'dark' : 'light'} />
+      <View style={styles.headerRow}>
+          <Text style={styles.title}>PalabrAr</Text>
+          {/* --- BOTÓN PARA CAMBIAR TEMA --- */}
+          <Pressable onPress={toggleTheme} style={styles.themeButton}>
+              <Text style={styles.themeButtonText}>{theme === 'light' ? '🌙' : '☀️'}</Text>
+          </Pressable>
+      </View>
       <View style={styles.menuButtons}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuButton}
           onPress={() => {
             resetGame();
@@ -300,18 +365,10 @@ const App: React.FC = () => {
         >
           <Text style={styles.menuButtonText}>Jugar</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.menuButton}
-          onPress={() => setCurrentScreen('instructions')}
-        >
+        <TouchableOpacity style={styles.menuButton} onPress={() => setCurrentScreen('instructions')}>
           <Text style={styles.menuButtonText}>¿Cómo jugar?</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.menuButton}
-          onPress={() => setCurrentScreen('stats')}
-        >
+        <TouchableOpacity style={styles.menuButton} onPress={() => setCurrentScreen('stats')}>
           <Text style={styles.menuButtonText}>Estadísticas</Text>
         </TouchableOpacity>
       </View>
@@ -319,117 +376,59 @@ const App: React.FC = () => {
   );
 
   const renderInstructionsScreen = () => (
-    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}> 
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}>
+      <ExpoStatusBar style={theme === 'light' ? 'dark' : 'light'} />
       <Text style={styles.title}>PalabrAr</Text>
       <Text style={styles.subtitle}>Cómo jugar</Text>
-      
       <View style={styles.instructionsContainer}>
         <View style={styles.exampleRow}>
-          <View style={[styles.exampleCell, { backgroundColor: '#6AAA64' }]}>
-            <Text style={[styles.exampleCellText, { color: 'white' }]}>C</Text>
-          </View>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>A</Text>
-          </View>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>B</Text>
-          </View>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>L</Text>
-          </View>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>E</Text>
-          </View>
-          <View style={styles.exampleCell} />
+          <View style={[styles.exampleCell, { backgroundColor: colors.correct }]}><Text style={styles.completedCellText}>C</Text></View>
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>A</Text></View>
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>B</Text></View>
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>L</Text></View>
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>E</Text></View>
         </View>
         <Text style={styles.instructionText}>Letra en lugar correcto</Text>
-        
         <View style={styles.exampleRow}>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>A</Text>
-          </View>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>B</Text>
-          </View>
-          <View style={[styles.exampleCell, { backgroundColor: '#C9B458' }]}>
-            <Text style={[styles.exampleCellText, { color: 'white' }]}>A</Text>
-          </View>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>L</Text>
-          </View>
-          <View style={styles.exampleCell}>
-            <Text style={styles.exampleCellText}>E</Text>
-          </View>
-          <View style={styles.exampleCell} />
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>T</Text></View>
+          <View style={[styles.exampleCell, { backgroundColor: colors.present }]}><Text style={styles.completedCellText}>A</Text></View>
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>N</Text></View>
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>G</Text></View>
+          <View style={styles.exampleCell}><Text style={styles.exampleCellText}>O</Text></View>
         </View>
         <Text style={styles.instructionText}>Letra en palabra, lugar incorrecto</Text>
-        
         <View style={styles.exampleRow}>
-          <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
-            <Text style={[styles.exampleCellText, { color: 'white' }]}>F</Text>
-          </View>
-          <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
-            <Text style={[styles.exampleCellText, { color: 'white' }]}>R</Text>
-          </View>
-          <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
-            <Text style={[styles.exampleCellText, { color: 'white' }]}>U</Text>
-          </View>
-          <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
-            <Text style={[styles.exampleCellText, { color: 'white' }]}>T</Text>
-          </View>
-          <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
-            <Text style={[styles.exampleCellText, { color: 'white' }]}>O</Text>
-          </View>
+          <View style={[styles.exampleCell, { backgroundColor: colors.absent }]}><Text style={styles.completedCellText}>F</Text></View>
+          <View style={[styles.exampleCell, { backgroundColor: colors.absent }]}><Text style={styles.completedCellText}>R</Text></View>
+          <View style={[styles.exampleCell, { backgroundColor: colors.absent }]}><Text style={styles.completedCellText}>U</Text></View>
+          <View style={[styles.exampleCell, { backgroundColor: colors.absent }]}><Text style={styles.completedCellText}>T</Text></View>
+          <View style={[styles.exampleCell, { backgroundColor: colors.absent }]}><Text style={styles.completedCellText}>O</Text></View>
         </View>
         <Text style={styles.instructionText}>Letra no está en la palabra</Text>
       </View>
-      
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => setCurrentScreen('menu')}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => setCurrentScreen('menu')}>
         <Text style={styles.backButtonText}>Volver</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 
   const renderStatsScreen = () => (
-    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}> 
-      <StatusBar style="dark" />
+    <SafeAreaView style={[styles.container, { paddingTop: getSafePadding() }]}>
+      <ExpoStatusBar style={theme === 'light' ? 'dark' : 'light'} />
       <Text style={styles.title}>PalabrAr</Text>
       <Text style={styles.subtitle}>Estadísticas</Text>
-      
       <View style={styles.statsContainer}>
         <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{stats.gamesPlayed}</Text>
-            <Text style={styles.statLabel}>Jugados</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{stats.gamesWon}</Text>
-            <Text style={styles.statLabel}>Ganados</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{stats.currentStreak}</Text>
-            <Text style={styles.statLabel}>Racha actual</Text>
-          </View>
+          <View style={styles.statItem}><Text style={styles.statNumber}>{stats.gamesPlayed}</Text><Text style={styles.statLabel}>Jugados</Text></View>
+          <View style={styles.statItem}><Text style={styles.statNumber}>{stats.gamesWon}</Text><Text style={styles.statLabel}>Ganados</Text></View>
+          <View style={styles.statItem}><Text style={styles.statNumber}>{stats.currentStreak}</Text><Text style={styles.statLabel}>Racha actual</Text></View>
         </View>
-        
         <View style={styles.distributionContainer}>
           {stats.guessDistribution.map((count, index) => (
             <View key={index} style={styles.distributionRow}>
               <Text style={styles.distributionNumber}>{index + 1}</Text>
               <View style={styles.distributionBar}>
-                <View 
-                  style={[
-                    styles.distributionFill,
-                    { 
-                      width: stats.gamesWon > 0 ? `${Math.max((count / stats.gamesWon) * 100, count > 0 ? 10 : 0)}%` : '0%',
-                      backgroundColor: count > 0 ? '#6AAA64' : '#E5E5E5'
-                    }
-                  ]}
-                >
+                <View style={[styles.distributionFill, { width: stats.gamesWon > 0 ? `${Math.max((count / stats.gamesWon) * 100, count > 0 ? 10 : 0)}%` : '0%', backgroundColor: count > 0 ? colors.correct : colors.distributionBar }]}>
                   {count > 0 && <Text style={styles.distributionCount}>{count}</Text>}
                 </View>
               </View>
@@ -437,11 +436,7 @@ const App: React.FC = () => {
           ))}
         </View>
       </View>
-      
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => setCurrentScreen('menu')}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => setCurrentScreen('menu')}>
         <Text style={styles.backButtonText}>Volver</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -449,74 +444,57 @@ const App: React.FC = () => {
 
   const renderCurrentScreen = () => {
     switch (currentScreen) {
-      case 'menu':
-        return renderMenuScreen();
-      case 'game':
-        return renderGameScreen();
-      case 'instructions':
-        return renderInstructionsScreen();
-      case 'stats':
-        return renderStatsScreen();
-      default:
-        return renderMenuScreen();
+      case 'menu': return renderMenuScreen();
+      case 'game': return renderGameScreen();
+      case 'instructions': return renderInstructionsScreen();
+      case 'stats': return renderStatsScreen();
+      default: return renderMenuScreen();
     }
   };
 
-  
-  const getSafePadding = () => {
-    if (Platform.OS === 'ios') {
-      return 60;
-    }
-    return 40;
-  };
+  const getSafePadding = () => (Platform.OS === 'ios' ? 60 : 40);
 
   return renderCurrentScreen();
 };
 
-const styles = StyleSheet.create({
+// --- 5. STYLESHEET COMO FUNCIÓN DINÁMICA ---
+const createStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     alignItems: 'center',
     paddingTop: 20,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
+    width: '90%',
     justifyContent: 'space-between',
-    marginBottom: 10,
-    paddingHorizontal: 10,
-  },
-  titleCentered: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    textAlign: 'center',
-    flex: 1,
-  },
-  backButtonSmall: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-  },
-  backButtonTextSmall: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+    marginBottom: 30,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4A90E2',
-    marginBottom: 30,
+    color: colors.primary,
+  },
+  titleCentered: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: colors.primary,
+    textAlign: 'center',
+    flex: 1,
   },
   subtitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.text,
     marginBottom: 30,
+  },
+  themeButton: {
+    padding: 8,
+  },
+  themeButtonText: {
+    fontSize: 28,
   },
   menuButtons: {
     flex: 1,
@@ -524,20 +502,19 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   menuButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: colors.primary,
     paddingVertical: 15,
-    paddingHorizontal: 30,
     borderRadius: 10,
     marginVertical: 10,
     alignItems: 'center',
   },
   menuButtonText: {
-    color: '#FFFFFF',
+    color: colors.primaryText,
     fontSize: 18,
     fontWeight: 'bold',
   },
   gameBoard: {
-    marginBottom: 30,
+    marginBottom: 20,
   },
   row: {
     flexDirection: 'row',
@@ -547,26 +524,25 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderWidth: 2,
-    borderColor: '#D3D6DA',
+    borderColor: colors.cellBorder,
     marginHorizontal: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.cellBackground,
   },
   activeCell: {
-    borderColor: '#4A90E2',
+    borderColor: colors.primary,
   },
   cellText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.text,
   },
   completedCellText: {
-    color: '#FFFFFF',
+    color: colors.primaryText,
   },
   keyboard: {
     width: '100%',
-    paddingHorizontal: 10,
   },
   keyboardRow: {
     flexDirection: 'row',
@@ -574,32 +550,27 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   keyboardBottom: {
-    width: '100%',
-    paddingHorizontal: 0,
     marginBottom: 10,
-    marginTop: 10,
-    flex: 0,
   },
   key: {
-    backgroundColor: '#D3D6DA',
-    paddingVertical: 14, 
-    paddingHorizontal: 7, 
+    backgroundColor: colors.keyBackground,
+    paddingVertical: 14,
+    paddingHorizontal: 7,
     marginHorizontal: 2,
     borderRadius: 4,
-    minWidth: 34,
+    minWidth: (width / 10) - 6, // Ajuste para que entre en pantalla
     alignItems: 'center',
   },
   wideKey: {
-    paddingHorizontal: 12, 
-    minWidth: 60, 
+    minWidth: (width / 10) * 1.5,
   },
   keyText: {
-    fontSize: 24, 
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.keyText,
   },
   wideKeyText: {
-    fontSize: 20, 
+    fontSize: 14,
   },
   instructionsContainer: {
     flex: 1,
@@ -614,33 +585,44 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderWidth: 2,
-    borderColor: '#D3D6DA',
+    borderColor: colors.cellBorder,
     marginHorizontal: 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.cellBackground,
   },
   exampleCellText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.text,
   },
   instructionText: {
     fontSize: 16,
-    color: '#333333',
+    color: colors.text,
     marginBottom: 30,
     textAlign: 'center',
   },
   backButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: colors.primary,
     paddingVertical: 15,
     paddingHorizontal: 50,
     borderRadius: 10,
     marginBottom: 30,
   },
   backButtonText: {
-    color: '#FFFFFF',
+    color: colors.primaryText,
     fontSize: 18,
+    fontWeight: 'bold',
+  },
+  backButtonSmall: {
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+  },
+  backButtonTextSmall: {
+    color: colors.primaryText,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   statsContainer: {
@@ -660,16 +642,15 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.text,
   },
   statLabel: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.secondaryText,
     textAlign: 'center',
   },
   distributionContainer: {
     width: '100%',
-    paddingHorizontal: 20,
   },
   distributionRow: {
     flexDirection: 'row',
@@ -679,13 +660,14 @@ const styles = StyleSheet.create({
   distributionNumber: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: colors.text,
     width: 20,
     textAlign: 'center',
   },
   distributionBar: {
     flex: 1,
     height: 30,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: colors.distributionBar,
     marginLeft: 10,
     borderRadius: 4,
   },
@@ -693,31 +675,26 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    paddingRight: 5,
     minWidth: 30,
   },
   distributionCount: {
-    color: '#FFFFFF',
+    color: colors.primaryText,
     fontWeight: 'bold',
     fontSize: 14,
   },
   enviarButton: {
-    backgroundColor: '#2979FF',
+    backgroundColor: colors.enviarButton,
     paddingVertical: 15,
-    paddingHorizontal: 40,
     borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 30,
-    alignSelf: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
+    marginHorizontal: 20,
+    marginBottom: 20,
     marginTop: 10,
   },
   enviarButtonText: {
-    color: '#FFFFFF',
+    color: colors.primaryText,
     fontSize: 18,
     fontWeight: 'bold',
   },
