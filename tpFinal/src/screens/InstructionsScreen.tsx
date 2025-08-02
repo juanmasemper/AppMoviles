@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../context/ThemeContext';
 
 interface InstructionsScreenProps {
-  onGoBack: () => void; 
+  onGoBack: () => void;
 }
 
 const InstructionsScreen: React.FC<InstructionsScreenProps> = ({ onGoBack }) => {
@@ -15,16 +15,43 @@ const InstructionsScreen: React.FC<InstructionsScreenProps> = ({ onGoBack }) => 
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 60 : 40 }]}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Text style={styles.title}>¿Cómo Jugar?</Text>
-      
+
       <View style={styles.instructionsContainer}>
         <Text style={styles.instructionText}>
-          Adivina la palabra oculta en seis intentos...
+          Adivina la palabra oculta en seis intentos.
+          Cada intento debe ser una palabra válida de 5 letras.
+          Después de cada intento, el color de las letras cambiará para mostrarte qué tan cerca estás de acertar la palabra.
         </Text>
 
-        {/* ... (el resto de la vista de ejemplos no cambia) ... */}
+        {/* Ejemplo 1: Letra correcta */}
+        <View style={styles.exampleRow}>
+          <View style={[styles.exampleCell, { backgroundColor: '#6AAA64' }]}>
+            <Text style={styles.exampleCellText}>C</Text>
+          </View>
+          <Text style={styles.exampleDescription}>La letra C está en la palabra y en la posición correcta.</Text>
+        </View>
+
+        {/* Ejemplo 2: Letra en lugar incorrecto */}
+        <View style={styles.exampleRow}>
+          <View style={[styles.exampleCell, { backgroundColor: '#C9B458' }]}>
+            <Text style={styles.exampleCellText}>A</Text>
+          </View>
+          <Text style={styles.exampleDescription}>La letra A está en la palabra pero en la posición incorrecta.</Text>
+        </View>
+
+        {/* Ejemplo 3: Letra incorrecta */}
+        <View style={styles.exampleRow}>
+          <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
+            <Text style={styles.exampleCellText}>F</Text>
+          </View>
+          <Text style={styles.exampleDescription}>La letra F no está en la palabra.</Text>
+        </View>
       </View>
-      
-      <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
+
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={onGoBack}
+      >
         <Text style={styles.backButtonText}>Entendido</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -56,13 +83,30 @@ const getStyles = (colors: any) => StyleSheet.create({
     marginBottom: 40,
     lineHeight: 22,
   },
-  exampleRow: { /* ... */ },
-  exampleCell: { /* ... */ },
-  exampleCellText: { /* ... */ },
+  exampleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '100%',
+  },
+  exampleCell: {
+    width: 50,
+    height: 50,
+    borderWidth: 2,
+    borderColor: '#D3D6DA', // El borde del ejemplo puede quedar estático
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 15,
+  },
+  exampleCellText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
   exampleDescription: {
     flex: 1,
     fontSize: 14,
-    color: colors.text, // Color de texto dinámico
+    color: colors.text,
   },
   backButton: {
     backgroundColor: colors.primary,
@@ -72,7 +116,7 @@ const getStyles = (colors: any) => StyleSheet.create({
     marginBottom: 30,
   },
   backButtonText: {
-    color: colors.background,
+    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
   },
