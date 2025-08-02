@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PALABRA_DEL_DIA, PALABRAS_VALIDAS } from '../constants/gameConstants';
+import { PALABRAS_VALIDAS, obtenerPalabraAleatoria } from '../constants/gameConstants';
 import { GameStats } from '../types';
 
 const initialBoard = () => Array(6).fill(null).map(() => Array(5).fill(''));
@@ -15,16 +15,14 @@ const initialKeyboardColors = {
   'N': '#D3D6DA', 'M': '#D3D6DA'
 };
 
-const getTodayString = () => new Date().toISOString().split('T')[0];
-
-export const useGame = () => {
+export const useFreeGame = () => {
   const [gameBoard, setGameBoard] = useState(initialBoard());
   const [currentRow, setCurrentRow] = useState(0);
   const [currentCol, setCurrentCol] = useState(0);
   const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost'>('playing');
   const [coloresGrilla, setColoresGrilla] = useState(initialGridColors());
   const [coloresTeclado, setColoresTeclado] = useState(initialKeyboardColors);
-  const [currentWord, setCurrentWord] = useState<string>(PALABRA_DEL_DIA);
+  const [currentWord, setCurrentWord] = useState<string>(''); 
   const [stats, setStats] = useState<GameStats>({
     gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0, 0, 0, 0, 0, 0]
   });
@@ -41,9 +39,8 @@ export const useGame = () => {
       col: currentCol,
       status: gameStatus,
       word: currentWord,
-      date: getTodayString(),
     };
-    await AsyncStorage.setItem('palabrar_dailyGame_state', JSON.stringify(gameState));
+    await AsyncStorage.setItem('palabrar_freeGame_state', JSON.stringify(gameState));
   }, [gameBoard, coloresGrilla, coloresTeclado, currentRow, currentCol, gameStatus, currentWord, isInitialized]);
 
   useEffect(() => {
@@ -55,15 +52,15 @@ export const useGame = () => {
   useEffect(() => {
     const loadState = async () => {
       try {
-        const savedStats = await AsyncStorage.getItem('palabrar_dailyGame_stats');
+        const savedStats = await AsyncStorage.getItem('palabrar_freeGame_stats');
         if (savedStats) setStats(JSON.parse(savedStats));
 
-        const savedGame = await AsyncStorage.getItem('palabrar_dailyGame_state');
+        const savedGame = await AsyncStorage.getItem('palabrar_freeGame_state');
         
         if (savedGame) {
           const gameState = JSON.parse(savedGame);
           
-          if (gameState.date === getTodayString()) {
+          if (gameState.word && gameState.word.length === 5) {
             setGameBoard(gameState.board);
             setColoresGrilla(gameState.colors);
             setColoresTeclado(gameState.keyboardColors);
@@ -72,11 +69,14 @@ export const useGame = () => {
             setGameStatus(gameState.status);
             setCurrentWord(gameState.word);
           } else {
-            resetForNewDay();
+            startNewGame();
           }
+        } else {
+          startNewGame();
         }
       } catch (error) {
-        console.error('Error loading daily game state:', error);
+        console.error('Error loading free game state:', error);
+        startNewGame();
       } finally {
         setIsInitialized(true);
       }
@@ -84,19 +84,21 @@ export const useGame = () => {
     loadState();
   }, []);
 
-  const resetForNewDay = () => {
+  const startNewGame = () => {
+    const newWord = obtenerPalabraAleatoria();
+    
     setGameBoard(initialBoard());
-    setColoresGrilla(initialGridColors());  
+    setColoresGrilla(initialGridColors());
     setColoresTeclado(initialKeyboardColors);
     setCurrentRow(0);
     setCurrentCol(0);
     setGameStatus('playing');
-    setCurrentWord(PALABRA_DEL_DIA);
-    AsyncStorage.removeItem('palabrar_dailyGame_state');
+    setCurrentWord(newWord);
   };
 
   const resetGame = () => {
-    resetForNewDay();
+    startNewGame();
+    AsyncStorage.removeItem('palabrar_freeGame_state');
   };
 
   const updateStats = (didWin: boolean) => {
@@ -112,7 +114,7 @@ export const useGame = () => {
       if (didWin) {
         newStats.guessDistribution[currentRow]++;
       }
-      AsyncStorage.setItem('palabrar_dailyGame_stats', JSON.stringify(newStats));
+      AsyncStorage.setItem('palabrar_freeGame_stats', JSON.stringify(newStats));
       return newStats;
     });
   };
@@ -144,6 +146,13 @@ export const useGame = () => {
   
   const submitGuess = () => {
     const currentGuess = gameBoard[currentRow].join('');
+    
+    if (!currentWord || currentWord.length !== 5) {
+      Alert.alert('Error', 'No hay palabra para adivinar. Reiniciando juego...');
+      startNewGame();
+      return;
+    }
+    
     if (currentGuess.length !== 5 || !PALABRAS_VALIDAS.includes(currentGuess)) {
       Alert.alert('Error', currentGuess.length !== 5 ? 'Palabra incompleta' : 'Palabra no válida');
       return;
@@ -207,7 +216,7 @@ export const useGame = () => {
     currentCol, 
     stats, 
     currentWord, 
-    handleKeyPress,
-    resetGame
+    handleKeyPress, 
+    resetGame 
   };
 };

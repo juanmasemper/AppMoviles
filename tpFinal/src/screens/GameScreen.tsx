@@ -2,20 +2,12 @@ import React from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Keyboard from '../components/Keyboard';
-import { GameStats } from '../types';
+import { useGame } from '../hooks/useGame';
+import { useFreeGame } from '../hooks/useFreeGame';
 
 interface GameScreenProps {
   onGoBack: () => void;
-  gameBoard: string[][];
-  coloresGrilla: string[][];
-  coloresTeclado: { [key: string]: string };
-  currentRow: number;
-  currentCol: number;
-  handleKeyPress: (key: string) => void;
-  gameStatus: 'playing' | 'won' | 'lost';
-  stats: GameStats; 
   gameMode?: 'daily' | 'free';
-  resetGame?: () => void;
 }
 
 const GameBoard: React.FC<{ board: string[][]; colors: string[][]; currentRow: number; currentCol: number;}> = 
@@ -42,8 +34,22 @@ const GameBoard: React.FC<{ board: string[][]; colors: string[][]; currentRow: n
   </View>
 );
 
-const GameScreen: React.FC<GameScreenProps> = (props) => {
-  const { onGoBack, gameBoard, coloresGrilla, coloresTeclado, currentRow, currentCol, handleKeyPress, gameMode, gameStatus } = props;
+const GameScreen = ({ gameMode, onGoBack }: GameScreenProps) => {
+  const dailyGame = useGame();
+  const freeGame = useFreeGame();
+  
+  const activeGame = gameMode === 'daily' ? dailyGame : freeGame;
+  
+  const { 
+    gameBoard, 
+    coloresGrilla, 
+    coloresTeclado, 
+    gameStatus, 
+    currentRow, 
+    currentCol, 
+    handleKeyPress,
+    resetGame 
+  } = activeGame;
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 40 : 40 }]}>
@@ -74,11 +80,7 @@ const GameScreen: React.FC<GameScreenProps> = (props) => {
         {gameMode === 'free' && gameStatus !== 'playing' && (
           <TouchableOpacity 
             style={styles.newGameButton} 
-            onPress={() => {
-              if (props.resetGame) {
-                props.resetGame();
-              }
-            }}
+            onPress={resetGame}
           >
             <Text style={styles.newGameButtonText}>Nuevo Juego</Text>
           </TouchableOpacity>
