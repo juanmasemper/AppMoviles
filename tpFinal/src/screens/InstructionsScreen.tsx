@@ -1,17 +1,21 @@
 import React from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '../context/ThemeContext';
 
 interface InstructionsScreenProps {
-  onGoBack: () => void; 
+  onGoBack: () => void;
 }
 
 const InstructionsScreen: React.FC<InstructionsScreenProps> = ({ onGoBack }) => {
+  const { theme, colors } = useTheme();
+  const styles = getStyles(colors);
+
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 60 : 40 }]}>
-      <StatusBar style="dark" />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Text style={styles.title}>¿Cómo Jugar?</Text>
-      
+
       <View style={styles.instructionsContainer}>
         <Text style={styles.instructionText}>
           Adivina la palabra oculta en seis intentos.
@@ -43,10 +47,10 @@ const InstructionsScreen: React.FC<InstructionsScreenProps> = ({ onGoBack }) => 
           <Text style={styles.exampleDescription}>La letra F no está en la palabra.</Text>
         </View>
       </View>
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         style={styles.backButton}
-        onPress={onGoBack} 
+        onPress={onGoBack}
       >
         <Text style={styles.backButtonText}>Entendido</Text>
       </TouchableOpacity>
@@ -54,17 +58,17 @@ const InstructionsScreen: React.FC<InstructionsScreenProps> = ({ onGoBack }) => 
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     alignItems: 'center',
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4A90E2',
+    color: colors.primary,
     marginBottom: 20,
   },
   instructionsContainer: {
@@ -74,7 +78,7 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontSize: 16,
-    color: '#333333',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: 40,
     lineHeight: 22,
@@ -89,7 +93,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderWidth: 2,
-    borderColor: '#D3D6DA',
+    borderColor: '#D3D6DA', // El borde del ejemplo puede quedar estático
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 15,
@@ -102,10 +106,10 @@ const styles = StyleSheet.create({
   exampleDescription: {
     flex: 1,
     fontSize: 14,
-    color: '#333333',
+    color: colors.text,
   },
   backButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: colors.primary,
     paddingVertical: 15,
     paddingHorizontal: 50,
     borderRadius: 10,

@@ -1,19 +1,22 @@
 import React from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { GameStats } from '../types'; 
+import { GameStats } from '../types';
+import { useTheme } from '../context/ThemeContext';
 
 interface StatsScreenProps {
   onGoBack: () => void;
-  stats: GameStats; 
+  stats: GameStats;
 }
 
 const StatsScreen: React.FC<StatsScreenProps> = ({ onGoBack, stats }) => {
+  const { theme, colors } = useTheme();
+  const styles = getStyles(colors);
   const maxDistributionCount = Math.max(...stats.guessDistribution, 1);
 
   return (
     <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 60 : 40 }]}>
-      <StatusBar style="dark" />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Text style={styles.title}>Estadísticas</Text>
 
       <View style={styles.statsContainer}>
@@ -44,7 +47,7 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ onGoBack, stats }) => {
                     styles.distributionFill,
                     {
                       width: `${(count / maxDistributionCount) * 100}%`,
-                      backgroundColor: count > 0 ? '#6AAA64' : '#E5E5E5',
+                      backgroundColor: count > 0 ? '#6AAA64' : colors.cellBorder,
                     },
                   ]}
                 >
@@ -64,17 +67,17 @@ const StatsScreen: React.FC<StatsScreenProps> = ({ onGoBack, stats }) => {
 };
 
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background,
     alignItems: 'center',
     paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4A90E2',
+    color: colors.primary,
     marginBottom: 30,
   },
   statsContainer: {
@@ -94,16 +97,18 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#333333',
+    color: colors.text,
   },
   statLabel: {
     fontSize: 14,
-    color: '#666666',
+    color: colors.text,
+    opacity: 0.8
   },
   distributionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: colors.text,
   },
   distributionContainer: {
     width: '100%',
@@ -118,11 +123,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     width: 20,
     textAlign: 'center',
+    color: colors.text,
   },
   distributionBar: {
     flex: 1,
     height: 20,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: colors.cellBorder,
     marginLeft: 10,
     borderRadius: 4,
     justifyContent: 'center',
@@ -133,16 +139,15 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center',
     paddingHorizontal: 5,
-    minWidth: 20, 
+    minWidth: 20,
   },
   distributionCount: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 12,
   },
-
   backButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: colors.primary,
     paddingVertical: 15,
     paddingHorizontal: 50,
     borderRadius: 10,
