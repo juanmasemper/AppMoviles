@@ -7,8 +7,9 @@ import StatsScreen from './src/screens/StatsScreen';
 import { useGame } from './src/hooks/useGame';
 import { useFreeGame } from './src/hooks/useFreeGame';
 import { Screen, GameMode } from './src/types';
+import { ThemeProvider } from './src/context/ThemeContext'; // Importa el ThemeProvider
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => { // Creamos un componente intermedio para el contenido
   const [currentScreen, setCurrentScreen] = useState<Screen>('menu');
   const [gameMode, setGameMode] = useState<GameMode>('daily');
 
@@ -59,6 +60,14 @@ const App: React.FC = () => {
   };
 
   return renderCurrentScreen();
+};
+
+const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
 };
 
 export default App;
