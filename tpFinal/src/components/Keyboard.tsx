@@ -31,13 +31,21 @@ const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, coloresTeclado, themeCo
                   { backgroundColor: keyColor },
                   isSpecialKey ? styles.specialKey : null,
                 ]}
-                onPress={() => onKeyPress(key === '⌫' ? 'BORRAR' : key === 'Enviar' ? 'ENVIAR' : key)}
+                onPress={() =>
+                  onKeyPress(key === '⌫' ? 'BORRAR' : key === 'Enviar' ? 'ENVIAR' : key)
+                }
               >
-                <Text style={[
-                  styles.keyText, 
-                  { color: textColor },
-                  isSpecialKey ? styles.specialKeyText : null
-                ]}>{key}</Text>
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  style={[
+                    styles.keyText,
+                    { color: textColor },
+                    isSpecialKey ? styles.specialKeyText : null,
+                  ]}
+                >
+                  {key}
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -46,7 +54,6 @@ const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, coloresTeclado, themeCo
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   keyboard: {
@@ -62,25 +69,29 @@ const styles = StyleSheet.create({
   },
   key: {
     backgroundColor: '#D3D6DA',
-    padding: 10,
     margin: 1.5,
     borderRadius: 8,
     height: 58,
     alignItems: 'center',
     justifyContent: 'center',
-    width: '9%', 
+    paddingHorizontal: 6,
+    flexGrow: 1,
+    flexBasis: 0,
+    minWidth: 32,
   },
   specialKey: {
-    width: '14%', 
-  }, 
+    minWidth: 50,
+    paddingHorizontal: 8,
+  },
   keyText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#333333',
   },
   specialKeyText: {
-    fontSize: 14,
-    lineHeight: 28,
+    fontSize: 12,
+    lineHeight: 20,
+    textAlign: 'center',
     textAlignVertical: 'center',
   },
 });
