@@ -4,9 +4,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 interface KeyboardProps {
   onKeyPress: (key: string) => void; 
   coloresTeclado: { [key: string]: string }; 
+  themeColors: any;
 }
 
-const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, coloresTeclado }) => {
+const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, coloresTeclado, themeColors }) => {
   const rows = [
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
     ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
