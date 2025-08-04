@@ -29,7 +29,6 @@ export const useGame = () => {
     gamesPlayed: 0, gamesWon: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0, 0, 0, 0, 0, 0]
   });
   const [isInitialized, setIsInitialized] = useState(false);
-
   const saveGameState = useCallback(async () => {
     if (!isInitialized) return; 
     
@@ -92,7 +91,6 @@ export const useGame = () => {
     setCurrentCol(0);
     setGameStatus('playing');
     setCurrentWord(PALABRA_DEL_DIA);
-    console.log('Palabra del día:', PALABRA_DEL_DIA);
     AsyncStorage.removeItem('palabrar_dailyGame_state');
   };
 
