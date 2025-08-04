@@ -1,121 +1,156 @@
 import React from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '../context/ThemeContext';
 
 interface InstructionsScreenProps {
-  onGoBack: () => void; 
+  onGoBack: () => void;
 }
 
 const InstructionsScreen: React.FC<InstructionsScreenProps> = ({ onGoBack }) => {
+  const { theme, colors } = useTheme();
+  const styles = getStyles(colors);
+
   return (
-    <SafeAreaView style={[styles.container, { paddingTop: Platform.OS === 'ios' ? 60 : 40 }]}>
-      <StatusBar style="dark" />
-      <Text style={styles.title}>¿Cómo Jugar?</Text>
-      
-      <View style={styles.instructionsContainer}>
-        <Text style={styles.instructionText}>
-          Adivina la palabra oculta en seis intentos.
-          Cada intento debe ser una palabra válida de 5 letras.
-          Después de cada intento, el color de las letras cambiará para mostrarte qué tan cerca estás de acertar la palabra.
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
 
-        {/* Ejemplo 1: Letra correcta */}
-        <View style={styles.exampleRow}>
-          <View style={[styles.exampleCell, { backgroundColor: '#6AAA64' }]}>
-            <Text style={styles.exampleCellText}>C</Text>
-          </View>
-          <Text style={styles.exampleDescription}>La letra C está en la palabra y en la posición correcta.</Text>
+      <View style={styles.wrapper}>
+        {/* Título */}
+        <View style={styles.header}>
+          <Text style={styles.title}>¿Cómo Jugar?</Text>
         </View>
 
-        {/* Ejemplo 2: Letra en lugar incorrecto */}
-        <View style={styles.exampleRow}>
-          <View style={[styles.exampleCell, { backgroundColor: '#C9B458' }]}>
-            <Text style={styles.exampleCellText}>A</Text>
+        {/* Instrucciones y ejemplos */}
+        <View style={styles.content}>
+          <Text style={styles.instructionText}>
+            Adivina la palabra oculta en seis intentos.{"\n"}
+            Cada intento debe ser una palabra válida de 5 letras.{"\n"}
+            Después de cada intento, el color de las letras cambiará para mostrarte qué tan cerca estás de acertar la palabra.
+          </Text>
+
+          <View style={styles.exampleRow}>
+            <View style={[styles.exampleCell, { backgroundColor: '#6AAA64' }]}>
+              <Text style={styles.exampleCellText}>C</Text>
+            </View>
+            <Text style={styles.exampleDescription}>
+              La letra C está en la palabra y en la posición correcta.
+            </Text>
           </View>
-          <Text style={styles.exampleDescription}>La letra A está en la palabra pero en la posición incorrecta.</Text>
+
+          <View style={styles.exampleRow}>
+            <View style={[styles.exampleCell, { backgroundColor: '#C9B458' }]}>
+              <Text style={styles.exampleCellText}>A</Text>
+            </View>
+            <Text style={styles.exampleDescription}>
+              La letra A está en la palabra pero en la posición incorrecta.
+            </Text>
+          </View>
+
+          <View style={styles.exampleRow}>
+            <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
+              <Text style={styles.exampleCellText}>F</Text>
+            </View>
+            <Text style={styles.exampleDescription}>
+              La letra F no está en la palabra.
+            </Text>
+          </View>
         </View>
 
-        {/* Ejemplo 3: Letra incorrecta */}
-        <View style={styles.exampleRow}>
-          <View style={[styles.exampleCell, { backgroundColor: '#787C7E' }]}>
-            <Text style={styles.exampleCellText}>F</Text>
-          </View>
-          <Text style={styles.exampleDescription}>La letra F no está en la palabra.</Text>
+        {/* Botón */}
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.backButton} onPress={onGoBack}>
+            <Text style={styles.backButtonText}>Entendido</Text>
+          </TouchableOpacity>
         </View>
       </View>
-      
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={onGoBack} 
-      >
-        <Text style={styles.backButtonText}>Entendido</Text>
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    marginBottom: 20,
-  },
-  instructionsContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    width: '100%',
-  },
-  instructionText: {
-    fontSize: 16,
-    color: '#333333',
-    textAlign: 'center',
-    marginBottom: 40,
-    lineHeight: 22,
-  },
-  exampleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    width: '100%',
-  },
-  exampleCell: {
-    width: 50,
-    height: 50,
-    borderWidth: 2,
-    borderColor: '#D3D6DA',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 15,
-  },
-  exampleCellText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  exampleDescription: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333333',
-  },
-  backButton: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 15,
-    paddingHorizontal: 50,
-    borderRadius: 10,
-    marginBottom: 30,
-  },
-  backButtonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
+const getStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: Platform.OS === 'ios' ? 40 : 20,
+    },
+    wrapper: {
+      flex: 1,
+      justifyContent: 'space-between',
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      paddingBottom: 60,
+    },
+    header: {
+      alignItems: 'center',
+      marginTop: 60,
+      marginBottom: 10,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.primary,
+      textAlign: 'center',
+    },
+    content: {
+      flexGrow: 1,
+      justifyContent: 'center',
+    },
+    instructionText: {
+      fontSize: 16,
+      color: colors.text,
+      textAlign: 'center',
+      marginBottom: 30,
+      lineHeight: 22,
+    },
+    exampleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 18,
+      width: '100%',
+    },
+    exampleCell: {
+      width: 50,
+      height: 50,
+      borderWidth: 2,
+      borderColor: '#D3D6DA',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 15,
+      borderRadius: 6,
+    },
+    exampleCellText: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+    },
+    exampleDescription: {
+      flex: 1,
+      fontSize: 14,
+      color: colors.text,
+    },
+    footer: {
+      alignItems: 'center',
+    },
+    backButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 14,
+      paddingHorizontal: 50,
+      borderRadius: 10,
+    },
+    backButtonText: {
+      color: '#FFFFFF',
+      fontSize: 18,
+      fontWeight: 'bold',
+    },
+  });
 
 export default InstructionsScreen;
