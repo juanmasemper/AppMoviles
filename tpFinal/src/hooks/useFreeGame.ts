@@ -94,6 +94,7 @@ export const useFreeGame = () => {
     setCurrentCol(0);
     setGameStatus('playing');
     setCurrentWord(newWord);
+    console.log('Palabra modo libre:', newWord);
   };
 
   const resetGame = () => {

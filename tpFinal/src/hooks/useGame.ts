@@ -92,6 +92,7 @@ export const useGame = () => {
     setCurrentCol(0);
     setGameStatus('playing');
     setCurrentWord(PALABRA_DEL_DIA);
+    console.log('Palabra del día:', PALABRA_DEL_DIA);
     AsyncStorage.removeItem('palabrar_dailyGame_state');
   };
 
